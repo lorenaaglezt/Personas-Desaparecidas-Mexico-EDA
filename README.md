@@ -47,20 +47,6 @@ quarto render tarea02.qmd --to pdf
 
 ---
 
-## Estructura del proyecto
-```
-├── data/
-│   ├── tot_reg_desap.csv        # dataset original
-├── tarea02.qmd                  # notebook principal
-├── requirements.txt             # dependencias de Python
-├── setup.ps1                    # script de setup para Windows
-├── setup.sh                     # script de setup para Mac/Linux
-└── README.md
-```
-
----
-
 ## Notas
-- No modificar el dataset original `tot_reg_desap.csv`.
-- El archivo `.venv/` está excluido del repositorio (ver `.gitignore`).
+- Es importante que en la raíz del proyecto se cree una carpeta nombrada `data` y se agregue el dataset original `tot_reg_desap.csv`.
 - El kernel de Jupyter se llama `tarea02` — si hay problemas, volver a ejecutar el script de setup.
