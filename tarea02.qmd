@@ -1,0 +1,24 @@
+---
+title: "Personas Desaparecidas en México"
+subtitle: "Tarea 02 — Almacenes y Minería de Datos"
+date: today
+format:
+  dashboard:
+    theme: sandstone
+    scrolling: true
+jupyter: tarea02
+execute:
+  warning: false
+  echo: false
+---
+```{python}
+#| tags: [parameters]
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+df = pd.read_csv("data/tot_reg_desap.csv")
+```
+
+# Descripción del Dataset
