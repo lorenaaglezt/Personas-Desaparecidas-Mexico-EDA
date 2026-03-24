@@ -12,7 +12,6 @@ execute:
   echo: false
 ---
 ```{python}
-#| tags: [parameters]
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -21,4 +20,75 @@ import seaborn as sns
 df = pd.read_csv("data/tot_reg_desap.csv")
 ```
 
-# Descripción del Dataset
+# Objetivo
+
+Durante las últimas dos décadas, México ha experimentado un aumento constante y alarmante en el número de desapariciones, generando una profunda crisis de derechos humanos. Aunado a la gravedad de este fenómeno, existe una preocupante incertidumbre sobre la precisión, continuidad y transparencia de los registros oficiales, lo que sugiere una pérdida de información vital. El objetivo de este proyecto de minería de datos es analizar la integridad y trazabilidad de los conjuntos de datos gubernamentales sobre personas desaparecidas. A través del análisis exploratorio y la limpieza de estos registros, se busca identificar discrepancias históricas, visibilizar posibles omisiones institucionales y aportar una perspectiva fundamentada en datos empíricos que contribuya a dimensionar esta crisis con mayor claridad.
+
+
+# Metodologías
+
+
+
+
+# Dataset: Personas Desaparecidas en México
+
+## Descripcion {.tabset}
+
+### Descripción del dataset
+
+### Diccionario de datos
+
+
+
+
+# CRISP-DM
+
+## Etapas {.tabset}
+
+### Business Understanting
+
+**Objetivo:** Analizar las dinámicas de desaparición en México y evaluar la integridad de los registros oficiales a lo largo del tiempo, identificando posibles omisiones, borrados o inconsistencias documentadas por organizaciones de derechos humanos.
+
+El registro de personas desaparecidas en México presenta desafíos significativos en cuanto a certeza, calidad y continuidad de la información a lo largo del tiempo. Ante el aumento sostenido de casos en las últimas décadas, el objetivo de esta investigación es aplicar metodologías de minería de datos para evaluar la consistencia del registro oficial (como la transición del RNPED al RNPDNO y el impacto de la Búsqueda Generalizada). El análisis busca mapear discrepancias, detectar anomalías en la clasificación del estatus de búsqueda y generar evidencia cuantitativa que permita entender las dinámicas de registro y posible omisión de datos por parte de las autoridades.
+
+**Preguntas de análisis**
+
+- ¿Qué porcentaje y volumen total de registros históricos presentes en el registro anterior (rnped, pre_rnped) ya no figuran en la versión pública actual del registro oficial (rnpdno_csv)?
+
+- ¿Existen patrones temporales o geográficos específicos en los registros que fueron presuntamente "borrados" u omitidos durante la transición de las bases de datos?
+
+- ¿Cuáles son las entidades federativas con mayor concentración de desapariciones y cómo ha sido el comportamiento anual de este fenómeno según las fechas de registro?
+
+**Criterios de Éxito**
+
+
+
+
+# Medidas, Visualización e Interpretación
+
+
+
+
+# Documentación: Limpieza del dataset
+
+## Documentación {.tabset}
+
+### Valores Faltantes
+
+### Duplicados
+
+### Tipos de Datos Correctos
+
+### Normalización
+
+### Validaciones
+
+
+
+
+# Hallazgos y Limitaciones
+
+
+
+
+# Conclusión
