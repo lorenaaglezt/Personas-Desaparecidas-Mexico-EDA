@@ -22,15 +22,24 @@ import seaborn as sns
 df = pd.read_csv("data/tot_reg_desap.csv")
 ```
 
-# Inicio {.menu}
+# Inicio
 
-## Objetivo {.menu-item}
-Durante las últimas dos décadas, México ha experimentado un aumento constante y alarmante en el número de desapariciones, generando una profunda crisis de derechos humanos. Aunado a la gravedad de este fenómeno, existe una preocupante incertidumbre sobre la precisión, continuidad y transparencia de los registros oficiales, lo que sugiere una pérdida de información vital. El objetivo de este proyecto de minería de datos es analizar la integridad y trazabilidad de los conjuntos de datos gubernamentales sobre personas desaparecidas. A través del análisis exploratorio y la limpieza de estos registros, se busca identificar discrepancias históricas, visibilizar posibles omisiones institucionales y aportar una perspectiva fundamentada en datos empíricos que contribuya a dimensionar esta crisis con mayor claridad.
+## Row
+#### Objetivo
 
-En el trabajo presente se utiliza el dataset nombrado "tot_reg_desap" que contiene la información procesada para este análisis.
+Los derechos humanos buscan asegurar la dignidad de las personas, su propósito radica en salvaguardar y garantizar el bien común sin discriminar por raza, sexo, religión, edad, ideologías, entre otros aspectos. Asimismo, el reconocimiento de los derechos humanos a partir de 1948 (proclamados en la Declaración Universal de los Derechos Humanos por la ONU) señala derechos inherentes a los individuos por el hecho de ser humanos, proporcionando una protección a no sufrir tratos crueles, inhumanos o degradantes. 
+
+La desaparición de personas es un problema de seguridad y justicia, es un fenómeno que viola la dignidad del ser humano, la cual se basa en el reconocimiento de la libertad e igualdad en sus derechos. Esta privación de libertad atenta contra los derechos humanos de las personas, afecta a las víctimas y a sus familias, sembrando miedo e incertidumbre en la sociedad.
+
+México es un país que alberga tradiciones y costumbres inigualables, sin embargo, no está exento de ser afectado por la violencia. Los índices de violencia han incrementado con el tiempo y se ha normalizado este fenómeno provocando falta de empatía y solidaridad en la sociedad, evidenciando la desigualdad. Con esto, la desaparición de personas en México ha experimentado un aumento constante y alarmante, generando una profunda crisis de derechos humanos.
+
+El objetivo del presente trabajo es analizar un conjunto de datos con información correspondiente a este fenómeno para identificar discrepancias históricas y aportar una perspectiva fundamentada en datos empíricos que contribuya a dimensionar esta crisis con mayor claridad.
+
+Además, en el desarrollo de este trabajo reconocemos la importancia de este tema que nos incumbe a todos como humanidad, es un tema que ha sembrado desesperanza no sólo en México, sino en varias partes del mundo, es por ello que lo debemos tratar con la delicadeza y detalle que merece.
 
 
-## Metodologías {.menu-item}
+## Row
+#### Metologías
 
 
 
@@ -139,17 +148,29 @@ diccionario.style \
 
 ## Etapas {.tabset}
 
-### Business Understanting
+### Business Understanding
 
-**Objetivo:** Analizar las dinámicas de desaparición en México y evaluar la integridad de los registros oficiales a lo largo del tiempo, identificando posibles omisiones, borrados o inconsistencias documentadas por organizaciones de derechos humanos.
+La desaparición forzada es una violación a los derechos humanos que representa un desafío para la justicia y la dignidad de las personas. Esto implica la privación de libertad seguida de la negación o el ocultamiento del paradero de la persona, lo que para las familias afectadas resulta en un ciclo de angustia y desesperación. Este fenómeno que ha ido aumentando en México a lo largo de los años, genera un clima de terror e impunidad, con lo que se ha convertido en una herramienta de represión y control.
 
-El registro de personas desaparecidas en México presenta desafíos significativos en cuanto a certeza, calidad y continuidad de la información a lo largo del tiempo. Ante el aumento sostenido de casos en las últimas décadas, el objetivo de esta investigación es aplicar metodologías de minería de datos para evaluar la consistencia del registro oficial (como la transición del RNPED al RNPDNO y el impacto de la Búsqueda Generalizada). El análisis busca mapear discrepancias, detectar anomalías en la clasificación del estatus de búsqueda y generar evidencia cuantitativa que permita entender las dinámicas de registro y posible omisión de datos por parte de las autoridades.
+El RNPED (Registro Nacional de Personas Extraviadas o Desaparecidas) es un registro que integra los datos de personas no localizadas obtenidos a partir de las denuncias presentadas ante la autoridad ministerial correspondiente. Este incluye únicamente a las personas que , ala fecha de corte, permanecen sin localizar. Es decir, presenta información de únicamente los casos activos, sin considerar información más completa.
+
+Este registro enfrentó problemas estructurales que limitaron su utilidad para localizar personas, por lo que se volvió una herramienta desactualizada que no proporcionaba una búsqueda efectiva. En consecuencia, con la presión social generada por el movimiento organizado de las familias, se logró la aprobación de la Ley General en Materia de Desaparición Forzada de Personas, Desaparición Cometida por Particulares y del Sistema Nacional de Búsqueda de Personas (LGMD o Ley General) en noviembre de 2017, en la cual tuvo lugar la creación del RNPDNO (Registro Nacional de Personas Desaparecidas y No Localizadas).
+
+Este nuevo registro presentó una posibilidad para visibilizar la desaparición, se volvió una herramienta de búsqueda, administrada y coordinada por la Comisión Nacional de Búsqueda de Personas (CNBP), que recopila y organiza información sobre personas desaparecidas o no localizadas, es importante recalcar que únicamente se tienen cifras de los registros reportados ante las autoridades y no de las cifras completas desapariciones en México. 
+
+El objetivo de aplicar Minería de Datos a estos registros es reconocer patrones sobre las desapariciones en México respecto a la ubicación geográfica o a las fechas de desaparición. Además, al contar con información sobre la transición del registro RNPED a RNPDNO, se busca encontrar patrones o perspectivas de cómo este cambio afecto a los registros y si se generaron sesgos en la información.
 
 **Preguntas de análisis**
 
-- ¿Qué porcentaje y volumen total de registros históricos presentes en el registro anterior (rnped, pre_rnped) ya no figuran en la versión pública actual del registro oficial (rnpdno_csv)?
+- ¿Cuáles son las entidades federativas con mayor índice de desaparecidos en México en los últimos años?
 
-- ¿Existen patrones temporales o geográficos específicos en los registros que fueron presuntamente "borrados" u omitidos durante la transición de las bases de datos?
+- ¿Cómo ha crecido el número de desapariciones en México?
+
+- ¿Cómo ha ido progresando a lo largo del tiempo el fenómeno de desapariciones forzadas en México?
+
+- ¿Qué porcentaje y volumen total de registros históricos presentes en el RNPED ya no figuran en la versión pública actual del registro oficial RNPDNO?
+
+- ¿Existen patrones temporales o geográficos específicos en los registros que fueron presuntamente omitidos durante la transición de las bases de datos (de RNPED a RNPDNO)?
 
 - ¿Cuáles son las entidades federativas con mayor concentración de desapariciones y cómo ha sido el comportamiento anual de este fenómeno según las fechas de registro?
 
