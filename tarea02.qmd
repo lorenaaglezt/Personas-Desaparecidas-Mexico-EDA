@@ -319,9 +319,57 @@ La limpieza del dataset se despliega con mayor detalle en [Documentación: Limpi
 
 ### Modelado
 
+La fase de modelado se centra en seleccionar y aplicar diversas técnicas de minería de datos, calibrar sus parámetros y construir modelos predictivos o descriptivos. Sin embargo, en el contexto de este proyecto sobre personas desaparecidas en México, aplicar esta etapa adquiere un significado particular y requiere una aproximación ética y analítica muy específica.
+
+El objetivo del modelado aquí es descubrir patrones ocultos, reglas implícitas y anomalías sistemáticas en la forma en que las autoridades han registrado, clasificado, transferido u omitido la información de las víctimas a lo largo del tiempo (especialmente en la transición del RNPED al RNPDNO y durante las fases de Búsqueda Generalizada bg_1 y bg_2). Se busca modelar el proceso de registro y reclasificación, no el delito en sí.
+
+Aunque para los fines de este proyecto no se entrenarán modelos analíticos complejos, las siguientes técnicas de minería de datos serían las más adecuadas para extraer conocimiento profundo de este conjunto de datos.
+
+<h3>Minería de Reglas de Asociación</h3>
+
+Esta técnica no supervisada es ideal para descubrir relaciones concurrentes entre variables categóricas y banderas lógicas que a simple vista parecen independientes.
+
+Permitiría descubrir reglas de negocio no documentadas. Por ejemplo, el algoritmo podría encontrar una regla fuerte que indique: SI (rnped == 1) Y (entidad_desap == "VERACRUZ") Y (bg_1 == 0) ENTONCES (rnpdno_csv == 0). Esto evidenciaría algorítmicamente que los registros históricos de un estado en particular fueron sistemáticamente excluidos de la base pública actual si no entraron en la primera fase de la Búsqueda Generalizada.
+
+<h3>Algoritmos de Agrupamiento</h3>
+
+En estas técnicas, al tener variables categóricas, permiten agrupar registros que comparten características muy similares sin necesidad de tener una variable objetivo predefinida.
+
+Podría aplicarse a las variables geográficas (entidad_desap) y temporales (fecha_desap) junto con las banderas de borrado institucional (pre_rnped == 1 y rnpdno_csv == 0). Esto ayudaría a identificar patrones de omición; es decir, espacios temporales en estados específicos donde ocurrieron desapariciones que posteriormente fueron borradas de los registros oficiales de manera masiva, sugiriendo patrones de ocultamiento de información en periodos políticos o de seguridad específicos.
+
 ### Evaluación
 
+En esta etapa es importante validar hallazgos, identificar sesgos y limitaciones. Básicamente se trata de identificar si el modelo cumple con los objetivos del negocio.
+
+Dado el contexto del presente trabajo respecto a las desapariciones de personas en México, la evaluación consiste en asegurar la validez del conocimiento extraído a partir del conjunto de datos trabajado, reconocer críticamente las deficiencias inherentes de los datos y determinar el valor práctico de los hallazgos para la comprensión del fenómeno.
+
+<h2>Validación de Hallazgos</h2>
+
+Recordando que el objetivo de este trabajo es obtener información sobre las desapariciones en México respecto a las entidades donde ocurren, las fechas de los hechos, los estatus y cómo ha ido progresando a lo largo del tiempo, validar los hallazgos resulta en contrastar los patrones estadísticos descubiertos con el contexto sociopolítico de nuestro país.
+
+Una parte fundamental de la validación de hallazgos se enfoca en el cuidado de manejo de datos durante la limpieza y transformación de los mismos. Durante la etapa de preparación de datos se debe vigilar que no se introduzcan datos inválidos o sesgos debido a datos faltantes. Esto previene errores de interpretación sobre la información analizada.
+
+Asimismo, para validar nuestros hallazgos buscamos responder a las preguntas objetivo planteadas en la parte de comprensión del negocio, esto nos permite enfocar el análisis de los datos a planteamientos específicos y así poder realizar conclusiones a partir de las observaciones. Otro aspecto a considerar en la evaluación es comparar los resultados de las medidas de los datos con las hipótesis preliminares antes planteadas para poder reforzarlas o refutarlas, de este modo podemos generar nuevas hipótesis y descubrir nuevos enfoques que no se consideraron al inicio de la metodología.
+
+<h2>Sesgos y Limitaciones</h2>
+
+Dado que el conjunto de datos que se trabaja es únicamente sobre registros oficiales ante autoridades administrativas, existen limitaciones sobre las cifras reales de las desapariciones de personas en México. Para que una persona desaparecida o no localizada sea considerada en este análisis, debe haber sido reportado ante las autoridades con el debido proceso. Esto resulta en que los hallazgos obtenidos a partir de la información no dimensionan verdaderamente la crisis en México, pero si ofrece un acercamiento al respecto.
+
+Por otro lado, como se pudo observar en la exploración inicial de los datos se identifico falta de información de múltiples registros en datos esenciales como el estatus de búsqueda o la fecha de desaparición. La alta prevalencia de datos faltantes restringe la profundidad de ciertos análisis temporales y espaciales, obligando a descartar filas que podrían contener información valiosa. Es por ello que en la limpieza del dataset se justifica cada decisión tomada al respecto para tener el mejor análisis posible.
+
+Además, los datos son generados, administrados y modificados por entidades gubernamentales que responden a métricas y presiones políticas. Variables clave como el estatus_busqueda o la inclusión en la Búsqueda Generalizada (bg_1, bg_2) pueden reflejar decisiones administrativas diseñadas para disminuir estadísticamente el número de casos activos, lo que introduce un sesgo oficialista en el análisis.
+
+Así, el análisis será útil si proporciona evidencia cuantitativa, reproducible y estructurada sobre las inconsistencias del registro, transformando un archivo CSV complejo en métricas claras de omisión y trazabilidad.
+
+::: {.callout-caution}
+Un criterio de utilidad innegociable es el respeto irrestricto a los datos sensibles. El análisis no debe revictimizar a las personas ni a sus familias, garantizando que el tratamiento de la información (nombres, fechas y estatus) se utilice exclusivamente para dimensionar la crisis en México sobre desapariciones de personas mediante la obtención de patrones en la información.
+:::
+
 ### Despliegue
+
+En el marco de este proyecto enfocado en la crisis de personas desaparecidas en México y la trazabilidad de los registros gubernamentales, la fase de despliegue no contempla la implementación de un software en tiempo real, sino la democratización, documentación y presentación estratégica de los hallazgos. El objetivo de esta fase es garantizar que el análisis sea reproducible, auditable y, sobre todo, comprensible para la toma de decisiones.
+
+Como resultado se realiza un reporte con el desarrollo y resultados de todo el proceso de la información que va desde la comprensión de la problemática hasta la presentación de hallazgos con sustento cuantitativo y herramientas de visualización que permitan comunicar el análisis llevado a cabo, y el dataset limpio y transformado con las debidas justificaciones de las decisiones tomada al respecto.
 
 # Medidas, Visualización e Interpretación
 
