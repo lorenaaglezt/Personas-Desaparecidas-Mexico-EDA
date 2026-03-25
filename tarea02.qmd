@@ -150,30 +150,39 @@ diccionario.style \
 
 ### Business Understanding
 
-La desaparición forzada es una violación a los derechos humanos que representa un desafío para la justicia y la dignidad de las personas. Esto implica la privación de libertad seguida de la negación o el ocultamiento del paradero de la persona, lo que para las familias afectadas resulta en un ciclo de angustia y desesperación. Este fenómeno que ha ido aumentando en México a lo largo de los años, genera un clima de terror e impunidad, con lo que se ha convertido en una herramienta de represión y control.
+La desaparición es una violación a los derechos humanos que representa un desafío para la justicia y la dignidad de las personas. Esta práctica implica la privación de libertad seguida de la negación o el ocultamiento del paradero de la persona, lo que sume a las familias afectadas resulta en un ciclo de angustia y desesperación. Este fenómeno, que ha ido en aumento en México a lo largo de los años, genera un clima de terror e impunidad, consolidándose en una herramienta de represión y control.
 
-El RNPED (Registro Nacional de Personas Extraviadas o Desaparecidas) es un registro que integra los datos de personas no localizadas obtenidos a partir de las denuncias presentadas ante la autoridad ministerial correspondiente. Este incluye únicamente a las personas que , ala fecha de corte, permanecen sin localizar. Es decir, presenta información de únicamente los casos activos, sin considerar información más completa.
+Históricamente, el Registro Nacional de Personas Extraviadas o Desaparecidas (RNPED) fungió como la base de datos que integraba la información de personas no localizadas a partir de denuncias ministeriales. Sin embargo, este registro incluía únicamente los casos activos a su fecha de corte, excluyendo información histórica y sin ofrecer un panorama completo del fenómeno.
 
-Este registro enfrentó problemas estructurales que limitaron su utilidad para localizar personas, por lo que se volvió una herramienta desactualizada que no proporcionaba una búsqueda efectiva. En consecuencia, con la presión social generada por el movimiento organizado de las familias, se logró la aprobación de la Ley General en Materia de Desaparición Forzada de Personas, Desaparición Cometida por Particulares y del Sistema Nacional de Búsqueda de Personas (LGMD o Ley General) en noviembre de 2017, en la cual tuvo lugar la creación del RNPDNO (Registro Nacional de Personas Desaparecidas y No Localizadas).
+Con el tiempo, el RNPED evidenció problemas estructurales que limitaron su utilidad, volviéndose una herramienta desactualizada e ineficaz para la búsqueda efectiva de personas. En respuesta a esta deficiencia, y gracias a la presión social ejercida por el movimiento organizado de familias, en noviembre de 2017 se aprobó la Ley General en Materia de Desaparición Forzada de Personas, Desaparición Cometida por Particulares y del Sistema Nacional de Búsqueda de Personas. Esta legislación dio paso a la creación del actual Registro Nacional de Personas Desaparecidas y No Localizadas (RNPDNO).
 
-Este nuevo registro presentó una posibilidad para visibilizar la desaparición, se volvió una herramienta de búsqueda, administrada y coordinada por la Comisión Nacional de Búsqueda de Personas (CNBP), que recopila y organiza información sobre personas desaparecidas o no localizadas, es importante recalcar que únicamente se tienen cifras de los registros reportados ante las autoridades y no de las cifras completas desapariciones en México. 
+Este nuevo registro, administrado y coordinado por la Comisión Nacional de Búsqueda de Personas (CNBP), representó una oportunidad para visibilizar la magnitud de las desapariciones y consolidar una herramienta de búsqueda más robusta. No obstante, es crucial subrayar que el RNPDNO refleja únicamente los casos formalmente denunciados ante las autoridades, lo que implica la existencia de una "cifra negra" que no representa la totalidad de las desapariciones en el país.
 
-El objetivo de aplicar Minería de Datos a estos registros es reconocer patrones sobre las desapariciones en México respecto a la ubicación geográfica o a las fechas de desaparición. Además, al contar con información sobre la transición del registro RNPED a RNPDNO, se busca encontrar patrones o perspectivas de cómo este cambio afecto a los registros y si se generaron sesgos en la información.
+Por su parte, la Búsqueda Generalizada, una de las diversas estrategias implementadas por la CNBP, es un proceso diseñado para revisar de manera exhaustiva los registros e indicios que permitan localizar a una persona o dar con su paradero. Este proceso se divide en tres etapas fundamentales: la identificación de escenarios de búsqueda, la recopilación y generación de información, y la verificación de los datos.
+
+La información utilizada para el análisis de este trabajo cuenta con información histórica de personas desaparecidas en México, indicando la presencia del registro en RNPED o en RNPDNO, además de información sobre los resultados de la búsqueda generalizada implementada por la CNBP.
+
+En este contexto, el objetivo de aplicar técnicas de Minería de Datos a estos conjuntos de información es descubrir patrones geográficos y temporales sobre las desapariciones en México. Asimismo, al analizar la transición de los datos del RNPED al RNPDNO, la investigación busca identificar cómo este cambio metodológico e institucional afectó la continuidad de los registros, revelando posibles sesgos, omisiones o reclasificaciones en la información oficial.
 
 **Preguntas de análisis**
+
+Para establecer el enfoque del análisis sobre los datos se plantean las siguientes preguntas para poder indagar en los patrones que nos muestra la información.
 
 - ¿Cuáles son las entidades federativas con mayor índice de desaparecidos en México en los últimos años?
 
 - ¿Cómo ha crecido el número de desapariciones en México?
 
-- ¿Cómo ha ido progresando a lo largo del tiempo el fenómeno de desapariciones forzadas en México?
+- ¿Cuál es la tendencia histórica anual del volumen de desapariciones registradas? ¿Qué entidades federativas concentran la mayor cantidad de casos?
 
-- ¿Qué porcentaje y volumen total de registros históricos presentes en el RNPED ya no figuran en la versión pública actual del registro oficial RNPDNO?
+- ¿Qué porcentaje y volumen total de registros históricos presentes en el RNPED ya no figuran en la versión pública actual del registro oficial (RNPDNO)?
 
-- ¿Existen patrones temporales o geográficos específicos en los registros que fueron presuntamente omitidos durante la transición de las bases de datos (de RNPED a RNPDNO)?
+- ¿Existen patrones temporales o geográficos específicos en los registros que fueron presuntamente omitidos durante la transición entre las bases de datos oficiales?
 
-- ¿Cuáles son las entidades federativas con mayor concentración de desapariciones y cómo ha sido el comportamiento anual de este fenómeno según las fechas de registro?
+- ¿Cómo ha impactado la implementación de la estrategia gubernamental de "Búsqueda Generalizada" en la reclasificación del estatus de búsqueda de las personas registradas?
 
+**Criterio de Éxito**
+
+Con el presente trabajo se busca lograr un análisis exploratorio que derive en hallazgossobre el conjunto de datos sustentados con evidencia gráfica, cuantificando objetivamente las insoncistencias, omisiones o reclasificaciones entre los registros gubernamentales históricos y actuales. Técnicamente, el éxito se medirá por la capacidad de procesar los datos anidados y generar un archivo completamente limpio y estandarizado  que permita una toma de decisiones informada.
 
 ### Data Understanding
 
