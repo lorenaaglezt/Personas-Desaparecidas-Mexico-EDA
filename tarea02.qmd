@@ -53,7 +53,7 @@ Además, en el desarrollo de este trabajo reconocemos la importancia de este tem
 
 ## Etapas {.tabset}
 
-### Business Understanding
+### Comprensión del Negocio
 
 La desaparición es una violación a los derechos humanos que representa un desafío para la justicia y la dignidad de las personas. Esta práctica implica la privación de libertad seguida de la negación o el ocultamiento del paradero de la persona, lo que sume a las familias afectadas resulta en un ciclo de angustia y desesperación. Este fenómeno, que ha ido en aumento en México a lo largo de los años, genera un clima de terror e impunidad, consolidándose en una herramienta de represión y control.
 
@@ -89,8 +89,7 @@ Para establecer el enfoque del análisis sobre los datos se plantean las siguien
 
 Con el presente trabajo se busca lograr un análisis exploratorio que derive en hallazgos sobre el conjunto de datos sustentados con evidencia gráfica, cuantificando objetivamente las insoncistencias, omisiones o reclasificaciones entre los registros gubernamentales históricos y actuales. Técnicamente, el éxito se medirá por la capacidad de procesar los datos anidados y generar un archivo completamente limpio y estandarizado  que permita una toma de decisiones informada.
 
-
-### Data Understanding
+### Comprensión de los Datos
 
 ::: {layout-nrow=6}
 
@@ -197,6 +196,8 @@ tabla_con_estilo = diccionario.style \
 display(tabla_con_estilo)
 ```
 
+Como unidad de análisis en este dataset se tiene que cada registro (cada fila) hace referencia a una persona desaparecida y sus variables que giran entorno a ello: nombre completo, lugar de desaparición, el estatus de la búsqueda y la fecha de desaparición. Además, contiene información para estos registros sobre la Búsqueda Generalizada, su presencia en RNPED y/o RNPDNO.
+
 ```{python}
 #| echo: false
 df['fecha_desap'] = pd.to_datetime(df['fecha_desap'], format='mixed', dayfirst=True, errors='coerce')
@@ -231,8 +232,13 @@ A partir de la inspección de los registros, se determinó que la unidad de aná
 
 ::: {.card}
 <h2>Calidad de los Datos</h2>
+
+El numero de filas con los que se encuentra el dataset en crudo son de 89,720 registros de los cuales posiblemente existan filas con valores incompletos, o bien, existan columnas cuyos datos se encuentran nulos, como consecuencia pueden existir inconsistencias en la calidad de los datos. 
+
+A continuación se presenta la cantidad y porcentaje de datos faltantes por columna en el dataset de análisis.
+
 ```{python}
-#| title: "Calidad de los datos — resumen de valores faltantes"
+#| title: "Valores faltantes en el dataset"
 #| echo: false
 
 import pandas as pd
@@ -255,13 +261,35 @@ missing.style \
     .background_gradient(subset=["Porcentaje (%)"], cmap="Reds") \
     .hide(axis="index")
 ```
-:::
 
+<h3>Observaciones</h3>
+
+- Se cuenta con 4 columnas que tienen datos faltantes en distintas proporciones, estos corresponden al estatus de búsqueda, Folio Único de Búsqueda, el id técnico DC_id y la fecha de desaparición. Los motivos de tales inconsistencias son variados; sin embargo, hay que constatar que para este punto no estamos considerando el dataset limpio. Aun así, tales motivos son tomados en cuenta en las siguientes secciones.
+- Columnas como rnpdno_json, rnpdno_csv, pre_rnped, rnped, bg_1 y bg_2 están almacenadas como enteros (0/1) pero representan valores booleanos que indican el estado del registro de la persona, es importante evitar que sean tratadas como variables numéricas continuas en el análisis.
+- Para la fecha de desaparición registrada se maneja como una cadena, por lo que durante el análisis puede generar complicaciones.
+- Durante la observación de los registros la columna DC_id contiene identificadores compuestos con texto y múltiples valores concatenados (por ejemplo, "349 (json), 448 (csv), UUID (fub)"), lo que la hace no directamente analizable como variable numérica o categórica simple. Su utilidad es técnica y de trazabilidad, no analítica.
+:::
 ::: {.card}
 <h2>Hipótesis Preliminares</h2>
+
+A partir de la exploración inicial del dataset se planetan las siguientes hipótesis preliminares como guía para las siguientes etapas.
+
+- Debido al cambio de registro de RNPED a RNPDNO, se puede sugerir que antes de esta transición los registros eran menos frecuentes debido a que RNPED era menos sitemático y con inconsistencias, introduciendo un sesgo en la información real de las desapariciones ocurridas en los periodos anteriores.
+- Respecto al porcentaje de valores faltanes en la columna correspondiente al FUB probablemente presenten también mayor proporción de valores faltantes en otras columnas, sugiriendo que son registros con menor información disponible en el sistema.
+- Debido a la presencia de información sobre la Búsqueda Generalizada en los registros, se debe observar mayor consistencia en el registro del estatus de búsqueda para aquellos registros que se contemplan dentro de la Búsqueda Generalizada (columnas bg_1 y bg_2). Esto debe indicar que estos procedimientos para encontrar a las personas desaparecidas proporcionan información sobre el estatus real de la persona y su registro sea actualizado y consistente.
+- Con la observación de las fechas de desaparición se espera observar cómo ha progresado la desaparición de personas en México a lo largo del tiempo, de cómo han influido el cambio de RNPED a RNPDNO, la implementación de la Búsqueda Generalizada y otros planes de acción para esta problemática en nuestro país.
 :::
 
 :::
+
+
+### Preparación de Datos
+
+### Modelado
+
+### Evaluación
+
+### Despliegue
 
 # Medidas, Visualización e Interpretación
 
