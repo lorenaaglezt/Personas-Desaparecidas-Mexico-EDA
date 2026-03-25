@@ -4,7 +4,9 @@ subtitle: "Tarea 02 — Almacenes y Minería de Datos"
 date: today
 format:
   dashboard:
-    theme: sandstone
+    theme:
+      light: flatly
+      dark: darkly
     scrolling: true
 jupyter: tarea02
 execute:
@@ -20,23 +22,115 @@ import seaborn as sns
 df = pd.read_csv("data/tot_reg_desap.csv")
 ```
 
-# Objetivo
+# Inicio {.menu}
 
+## Objetivo {.menu-item}
 Durante las últimas dos décadas, México ha experimentado un aumento constante y alarmante en el número de desapariciones, generando una profunda crisis de derechos humanos. Aunado a la gravedad de este fenómeno, existe una preocupante incertidumbre sobre la precisión, continuidad y transparencia de los registros oficiales, lo que sugiere una pérdida de información vital. El objetivo de este proyecto de minería de datos es analizar la integridad y trazabilidad de los conjuntos de datos gubernamentales sobre personas desaparecidas. A través del análisis exploratorio y la limpieza de estos registros, se busca identificar discrepancias históricas, visibilizar posibles omisiones institucionales y aportar una perspectiva fundamentada en datos empíricos que contribuya a dimensionar esta crisis con mayor claridad.
 
+En el trabajo presente se utiliza el dataset nombrado "tot_reg_desap" que contiene la información procesada para este análisis.
 
-# Metodologías
+
+## Metodologías {.menu-item}
 
 
 
 
 # Dataset: Personas Desaparecidas en México
 
-## Descripcion {.tabset}
+## Descripción del dataset
 
-### Descripción del dataset
+## Row
+```{python}
+#| title: "Diccionario de datos"
+#| echo: false
 
-### Diccionario de datos
+import pandas as pd
+
+diccionario = pd.DataFrame([
+    {
+        "Columna": "nombrecompleto",
+        "Descripción": "Nombre completo de la persona desaparecida o no localizada según el registro oficial.",
+        "Tipo de dato": "String",
+        "Tipo estadístico": "Categórica nominal"
+    },
+    {
+        "Columna": "rnpdno_json",
+        "Descripción": "Booleano que indica si el registro aparece en la extracción de datos vía JSON del portal oficial.",
+        "Tipo de dato": "Booleano (0/1)",
+        "Tipo estadístico": "Categórica nominal"
+    },
+    {
+        "Columna": "entidad_desap",
+        "Descripción": "Estado o entidad federativa donde se reportó el evento de desaparición o se tuvo el último contacto.",
+        "Tipo de dato": "String",
+        "Tipo estadístico": "Categórica nominal"
+    },
+    {
+        "Columna": "pre_rnped",
+        "Descripción": "Indica si la fila aparece en el Registro de Personas Desaparecidas en versiones previas a 2018 (RNPED histórico).",
+        "Tipo de dato": "Booleano (0/1)",
+        "Tipo estadístico": "Categórica nominal"
+    },
+    {
+        "Columna": "rnped",
+        "Descripción": "Indica si la fila aparece en el RNPDO, versión original anterior al registro actual.",
+        "Tipo de dato": "Booleano (0/1)",
+        "Tipo estadístico": "Categórica nominal"
+    },
+    {
+        "Columna": "rnpdno_csv",
+        "Descripción": "Booleano que indica si el registro está presente en la base de datos del RNPD (registro actual en CSV).",
+        "Tipo de dato": "Booleano (0/1)",
+        "Tipo estadístico": "Categórica nominal"
+    },
+    {
+        "Columna": "bg_1",
+        "Descripción": "Estatus Búsqueda Generalizada 1: clasificación del registro en la primera publicación del 14 de diciembre de 2023.",
+        "Tipo de dato": "Booleano (0/1)",
+        "Tipo estadístico": "Categórica nominal"
+    },
+    {
+        "Columna": "estatus_busqueda",
+        "Descripción": "Resultado de la Estrategia Nacional de Búsqueda Generalizada (Censo). Clasifica el caso en categorías: Con indicios/Ubicada, Se busca reportante, Denuncia confirmada, Se requieren datos de identidad, entre otras.",
+        "Tipo de dato": "String",
+        "Tipo estadístico": "Categórica nominal"
+    },
+    {
+        "Columna": "bg_2",
+        "Descripción": "Estatus Búsqueda Generalizada 2: actualización del estatus a partir de la segunda publicación del 27 de diciembre de 2023.",
+        "Tipo de dato": "Booleano (0/1)",
+        "Tipo estadístico": "Categórica nominal"
+    },
+    {
+        "Columna": "fub",
+        "Descripción": "Folio Único de Búsqueda: identificador alfanumérico universal (UUID). Llave primaria para rastrear a la persona en todas las versiones del registro.",
+        "Tipo de dato": "String (UUID)",
+        "Tipo estadístico": "Categórica nominal"
+    },
+    {
+        "Columna": "DC_id",
+        "Descripción": "Data Correlation ID: identificador técnico relativo al archivo de origen (JSON o CSV). No es un ID único global, sino de posición en el dataset.",
+        "Tipo de dato": "String",
+        "Tipo estadístico": "Categórica nominal"
+    },
+    {
+        "Columna": "fecha_desap",
+        "Descripción": "Fecha registrada de la desaparición o no localización de la persona.",
+        "Tipo de dato": "Fecha (dd/mm/yyyy)",
+        "Tipo estadístico": "Numérica discreta (temporal)"
+    },
+])
+
+diccionario.style \
+    .set_properties(**{"text-align": "left", "font-size": "12px"}) \
+    .set_table_styles([
+        {"selector": "th", "props": [("font-weight", "600"), ("font-size", "12px"), ("text-align", "left"), ("border-bottom", "2px solid #ddd")]},
+        {"selector": "td", "props": [("vertical-align", "top"), ("padding", "6px 10px"), ("border-bottom", "1px solid #eee")]},
+        {"selector": "tr:hover td", "props": [("background-color", "#f5f5f5")]},
+    ]) \
+    .hide(axis="index")
+```
+
 
 
 
@@ -59,7 +153,10 @@ El registro de personas desaparecidas en México presenta desafíos significativ
 
 - ¿Cuáles son las entidades federativas con mayor concentración de desapariciones y cómo ha sido el comportamiento anual de este fenómeno según las fechas de registro?
 
-**Criterios de Éxito**
+
+### Data Understanding
+
+
 
 
 
