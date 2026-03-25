@@ -33,7 +33,7 @@ La desaparición de personas es un problema de seguridad y justicia, es un fenó
 
 México es un país que alberga tradiciones y costumbres inigualables, sin embargo, no está exento de ser afectado por la violencia. Los índices de violencia han incrementado con el tiempo y se ha normalizado este fenómeno provocando falta de empatía y solidaridad en la sociedad, evidenciando la desigualdad. Con esto, la desaparición de personas en México ha experimentado un aumento constante y alarmante, generando una profunda crisis de derechos humanos.
 
-El objetivo del presente trabajo es analizar un conjunto de datos con información correspondiente a este fenómeno para identificar discrepancias históricas y aportar una perspectiva fundamentada en datos empíricos que contribuya a dimensionar esta crisis con mayor claridad.
+El objetivo del presente trabajo es analizar un conjunto de datos con información correspondiente a este fenómeno para identificar discrepancias históricas y aportar una perspectiva fundamentada en datos empíricos que contribuya a dimensionar esta crisis con mayor claridad. Para ello, contamos con un data set con información sobre los registros de las desapariciones de personas en México en formato csv.
 
 Además, en el desarrollo de este trabajo reconocemos la importancia de este tema que nos incumbe a todos como humanidad, es un tema que ha sembrado desesperanza no sólo en México, sino en varias partes del mundo, es por ello que lo debemos tratar con la delicadeza y detalle que merece.
 
@@ -46,14 +46,63 @@ Además, en el desarrollo de este trabajo reconocemos la importancia de este tem
 
 # Dataset: Personas Desaparecidas en México
 
-## Descripción del dataset
 
-## Row
+
+
+# CRISP-DM
+
+## Etapas {.tabset}
+
+### Business Understanding
+
+La desaparición es una violación a los derechos humanos que representa un desafío para la justicia y la dignidad de las personas. Esta práctica implica la privación de libertad seguida de la negación o el ocultamiento del paradero de la persona, lo que sume a las familias afectadas resulta en un ciclo de angustia y desesperación. Este fenómeno, que ha ido en aumento en México a lo largo de los años, genera un clima de terror e impunidad, consolidándose en una herramienta de represión y control.
+
+Históricamente, el Registro Nacional de Personas Extraviadas o Desaparecidas (RNPED) fungió como la base de datos que integraba la información de personas no localizadas a partir de denuncias ministeriales. Sin embargo, este registro incluía únicamente los casos activos a su fecha de corte, excluyendo información histórica y sin ofrecer un panorama completo del fenómeno.
+
+Con el tiempo, el RNPED evidenció problemas estructurales que limitaron su utilidad, volviéndose una herramienta desactualizada e ineficaz para la búsqueda efectiva de personas. En respuesta a esta deficiencia, y gracias a la presión social ejercida por el movimiento organizado de familias, en noviembre de 2017 se aprobó la Ley General en Materia de Desaparición Forzada de Personas, Desaparición Cometida por Particulares y del Sistema Nacional de Búsqueda de Personas. Esta legislación dio paso a la creación del actual Registro Nacional de Personas Desaparecidas y No Localizadas (RNPDNO).
+
+Este nuevo registro, administrado y coordinado por la Comisión Nacional de Búsqueda de Personas (CNBP), representó una oportunidad para visibilizar la magnitud de las desapariciones y consolidar una herramienta de búsqueda más robusta. No obstante, es crucial subrayar que el RNPDNO refleja únicamente los casos formalmente denunciados ante las autoridades, lo que implica la existencia de una "cifra negra" que no representa la totalidad de las desapariciones en el país.
+
+Por su parte, la Búsqueda Generalizada, una de las diversas estrategias implementadas por la CNBP, es un proceso diseñado para revisar de manera exhaustiva los registros e indicios que permitan localizar a una persona o dar con su paradero. Este proceso se divide en tres etapas fundamentales: la identificación de escenarios de búsqueda, la recopilación y generación de información, y la verificación de los datos.
+
+La información utilizada para el análisis de este trabajo cuenta con información histórica de personas desaparecidas en México, indicando la presencia del registro en RNPED o en RNPDNO, además de información sobre los resultados de la búsqueda generalizada implementada por la CNBP.
+
+En este contexto, el objetivo de aplicar técnicas de Minería de Datos a estos conjuntos de información es descubrir patrones geográficos y temporales sobre las desapariciones en México. Asimismo, al analizar la transición de los datos del RNPED al RNPDNO, la investigación busca identificar cómo este cambio metodológico e institucional afectó la continuidad de los registros, revelando posibles sesgos, omisiones o reclasificaciones en la información oficial.
+
+<h3>Preguntas de análisis</h3>
+
+Para establecer el enfoque del análisis sobre los datos se plantean las siguientes preguntas para poder indagar en los patrones que nos muestra la información.
+
+- ¿Cuáles son las entidades federativas con mayor índice de desaparecidos en México en los últimos años?
+
+- ¿Cómo ha crecido el número de desapariciones en México?
+
+- ¿Cuál es la tendencia histórica anual del volumen de desapariciones registradas? ¿Qué entidades federativas concentran la mayor cantidad de casos?
+
+- ¿Qué porcentaje y volumen total de registros históricos presentes en el RNPED ya no figuran en la versión pública actual del registro oficial (RNPDNO)?
+
+- ¿Existen patrones temporales o geográficos específicos en los registros que fueron presuntamente omitidos durante la transición entre las bases de datos oficiales?
+
+- ¿Cómo ha impactado la implementación de la estrategia gubernamental de "Búsqueda Generalizada" en la reclasificación del estatus de búsqueda de las personas registradas?
+
+<h3>Criterio de Éxito</h3>
+
+Con el presente trabajo se busca lograr un análisis exploratorio que derive en hallazgos sobre el conjunto de datos sustentados con evidencia gráfica, cuantificando objetivamente las insoncistencias, omisiones o reclasificaciones entre los registros gubernamentales históricos y actuales. Técnicamente, el éxito se medirá por la capacidad de procesar los datos anidados y generar un archivo completamente limpio y estandarizado  que permita una toma de decisiones informada.
+
+
+### Data Understanding
+
+::: {layout-nrow=6}
+
+::: {.card}
+Para proceder con el análisis de los datos se cuenta con un dataset con formato CSV que contiene información de los registros de personas desaparecidas en México. A continuación se presenta una descripción de las columnas que contiene el dataset junto con su descripción, tipo de dato y tipo estadístico. 
+:::
 ```{python}
 #| title: "Diccionario de datos"
 #| echo: false
 
 import pandas as pd
+from IPython.display import display
 
 diccionario = pd.DataFrame([
     {
@@ -130,66 +179,89 @@ diccionario = pd.DataFrame([
     },
 ])
 
-diccionario.style \
-    .set_properties(**{"text-align": "left", "font-size": "12px"}) \
+tabla_con_estilo = diccionario.style \
+    .set_properties(**{"text-align": "left", "font-size": "13px"}) \
     .set_table_styles([
-        {"selector": "th", "props": [("font-weight", "600"), ("font-size", "12px"), ("text-align", "left"), ("border-bottom", "2px solid #ddd")]},
-        {"selector": "td", "props": [("vertical-align", "top"), ("padding", "6px 10px"), ("border-bottom", "1px solid #eee")]},
-        {"selector": "tr:hover td", "props": [("background-color", "#f5f5f5")]},
+        # encabezado
+        {"selector": "th", "props": [("background-color", "#4d2c18"), ("color", "white"), ("font-weight", "bold"), ("font-size", "14px"), ("text-align", "left"), ("padding", "10px")]},
+        
+        # celdas
+        {"selector": "td", "props": [("vertical-align", "top"), ("padding", "8px 10px"), ("border-bottom", "1px solid #dcb685")]},
+        
+        # hover
+        {"selector": "tr:hover td", "props": [("background-color", "#D6EAF8"), ("color", "#000000")]},
     ]) \
     .hide(axis="index")
+
+# Usamos display() para que Quarto dibuje el HTML generado
+display(tabla_con_estilo)
 ```
 
+```{python}
+#| echo: false
+df['fecha_desap'] = pd.to_datetime(df['fecha_desap'], format='mixed', dayfirst=True, errors='coerce')
 
+filas = df.shape[0]
+columnas = df.shape[1]
+min_fecha = df['fecha_desap'].min().strftime('%d/%m/%Y')
+max_fecha = df['fecha_desap'].max().strftime('%d/%m/%Y')
+```
 
+::: {layout-ncol=3}
+::: {.card style="background-color: #406c41 !important; color: white !important;"}
+El conjunto de datos contiene **`{python} filas`** registros de personas desaparecidas en México
+:::
+::: {.card style="background-color: #4abeb5 !important; color: white !important;"}
+Para cada registro se tienen hasta **`{python} columnas`** variables que describen dicho registro
+:::
+::: {.card style="background-color: #b3c54b !important; color: white !important;"}
+El periodo que abarca el conjunto de datos va desde **`{python} min_fecha`** hasta **`{python} max_fecha`**
+:::
+:::
 
+::: {.card}
+<h2>Exploración Inicial</h2>
 
-# CRISP-DM
+A partir de la inspección de los registros, se determinó que la unidad de análisis corresponde a un caso individual de una persona desaparecida o nolocalizada. Después del análisis de las columnas encontramos que tenemos tres tipos de información:
 
-## Etapas {.tabset}
+- **Identificación del caso:** Tales como el nombre de la persona, el Folio Único de Búsqueda o DC_id (identificador compuesto entre JSON y CSV)
+- **Contexto espacio-tiempo:** Como el estado de la república de la desaparición, la fecha del suceso y el estatus de la búsqueda.
+- **Trazabilidad Institucional:** Aquellas variables que indican la presencia del registro en distintas bases de datos gubernamentales a lo largo del tiempo como RNPED, RNPDNO o BG (Búsqueda Generalizada).
+:::
 
-### Business Understanding
+::: {.card}
+<h2>Calidad de los Datos</h2>
+```{python}
+#| title: "Calidad de los datos — resumen de valores faltantes"
+#| echo: false
 
-La desaparición es una violación a los derechos humanos que representa un desafío para la justicia y la dignidad de las personas. Esta práctica implica la privación de libertad seguida de la negación o el ocultamiento del paradero de la persona, lo que sume a las familias afectadas resulta en un ciclo de angustia y desesperación. Este fenómeno, que ha ido en aumento en México a lo largo de los años, genera un clima de terror e impunidad, consolidándose en una herramienta de represión y control.
+import pandas as pd
 
-Históricamente, el Registro Nacional de Personas Extraviadas o Desaparecidas (RNPED) fungió como la base de datos que integraba la información de personas no localizadas a partir de denuncias ministeriales. Sin embargo, este registro incluía únicamente los casos activos a su fecha de corte, excluyendo información histórica y sin ofrecer un panorama completo del fenómeno.
+df = pd.read_csv("data/tot_reg_desap.csv")
 
-Con el tiempo, el RNPED evidenció problemas estructurales que limitaron su utilidad, volviéndose una herramienta desactualizada e ineficaz para la búsqueda efectiva de personas. En respuesta a esta deficiencia, y gracias a la presión social ejercida por el movimiento organizado de familias, en noviembre de 2017 se aprobó la Ley General en Materia de Desaparición Forzada de Personas, Desaparición Cometida por Particulares y del Sistema Nacional de Búsqueda de Personas. Esta legislación dio paso a la creación del actual Registro Nacional de Personas Desaparecidas y No Localizadas (RNPDNO).
+missing = pd.DataFrame({
+    "Columna": df.columns,
+    "Valores faltantes": df.isnull().sum().values,
+    "Porcentaje (%)": (df.isnull().sum().values / len(df) * 100).round(2),
+    "Tipo inferido": df.dtypes.astype(str).values
+})
 
-Este nuevo registro, administrado y coordinado por la Comisión Nacional de Búsqueda de Personas (CNBP), representó una oportunidad para visibilizar la magnitud de las desapariciones y consolidar una herramienta de búsqueda más robusta. No obstante, es crucial subrayar que el RNPDNO refleja únicamente los casos formalmente denunciados ante las autoridades, lo que implica la existencia de una "cifra negra" que no representa la totalidad de las desapariciones en el país.
+missing.style \
+    .set_properties(**{"font-size": "12px", "text-align": "left"}) \
+    .set_table_styles([
+        {"selector": "th", "props": [("font-weight", "600"), ("font-size", "12px"), ("border-bottom", "2px solid #ddd")]},
+        {"selector": "td", "props": [("padding", "6px 10px"), ("border-bottom", "1px solid #eee")]},
+    ]) \
+    .background_gradient(subset=["Porcentaje (%)"], cmap="Reds") \
+    .hide(axis="index")
+```
+:::
 
-Por su parte, la Búsqueda Generalizada, una de las diversas estrategias implementadas por la CNBP, es un proceso diseñado para revisar de manera exhaustiva los registros e indicios que permitan localizar a una persona o dar con su paradero. Este proceso se divide en tres etapas fundamentales: la identificación de escenarios de búsqueda, la recopilación y generación de información, y la verificación de los datos.
+::: {.card}
+<h2>Hipótesis Preliminares</h2>
+:::
 
-La información utilizada para el análisis de este trabajo cuenta con información histórica de personas desaparecidas en México, indicando la presencia del registro en RNPED o en RNPDNO, además de información sobre los resultados de la búsqueda generalizada implementada por la CNBP.
-
-En este contexto, el objetivo de aplicar técnicas de Minería de Datos a estos conjuntos de información es descubrir patrones geográficos y temporales sobre las desapariciones en México. Asimismo, al analizar la transición de los datos del RNPED al RNPDNO, la investigación busca identificar cómo este cambio metodológico e institucional afectó la continuidad de los registros, revelando posibles sesgos, omisiones o reclasificaciones en la información oficial.
-
-**Preguntas de análisis**
-
-Para establecer el enfoque del análisis sobre los datos se plantean las siguientes preguntas para poder indagar en los patrones que nos muestra la información.
-
-- ¿Cuáles son las entidades federativas con mayor índice de desaparecidos en México en los últimos años?
-
-- ¿Cómo ha crecido el número de desapariciones en México?
-
-- ¿Cuál es la tendencia histórica anual del volumen de desapariciones registradas? ¿Qué entidades federativas concentran la mayor cantidad de casos?
-
-- ¿Qué porcentaje y volumen total de registros históricos presentes en el RNPED ya no figuran en la versión pública actual del registro oficial (RNPDNO)?
-
-- ¿Existen patrones temporales o geográficos específicos en los registros que fueron presuntamente omitidos durante la transición entre las bases de datos oficiales?
-
-- ¿Cómo ha impactado la implementación de la estrategia gubernamental de "Búsqueda Generalizada" en la reclasificación del estatus de búsqueda de las personas registradas?
-
-**Criterio de Éxito**
-
-Con el presente trabajo se busca lograr un análisis exploratorio que derive en hallazgossobre el conjunto de datos sustentados con evidencia gráfica, cuantificando objetivamente las insoncistencias, omisiones o reclasificaciones entre los registros gubernamentales históricos y actuales. Técnicamente, el éxito se medirá por la capacidad de procesar los datos anidados y generar un archivo completamente limpio y estandarizado  que permita una toma de decisiones informada.
-
-### Data Understanding
-
-
-
-
-
+:::
 
 # Medidas, Visualización e Interpretación
 
