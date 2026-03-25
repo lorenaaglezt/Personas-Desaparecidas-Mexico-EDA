@@ -285,6 +285,38 @@ A partir de la exploración inicial del dataset se planetan las siguientes hipó
 
 ### Preparación de Datos
 
+La siguiente etapa consiste en la limpieza y transformación de los datos. En el contexto este dataset sobre personas desaparecidas en México, cada decisión de limpieza tiene implicaciones directas sobre la representación de casos reales. Limpiar este dataset significa, en términos concretos, asegurarse de que cada fila represente fidedignamente a una persona, sin distorsionar ni invisibilizar ningún caso.
+
+<h2>Tareas de Limpieza</h2>
+
+Existen múltiples tareas de limpieza que se deben aplicar al dataset, iniciando por el tratamiento de valores faltantes en las múltiples columnas. Es importante analizar cómo impacta la ausencia de dicha variable en el registro de una persona desaparecida y tomar una decisión al respecto, para ello la eliminación de registros o sustitución de valores debe ser realizado con mucho cuidado, pues introducir datos que no existen puede llevar a conclusiones falsas sobre cuándo ocurrieron las desapariciones, afectando potencialmente decisiones de política pública. Tal es el caso de la columna de estatus de búsqueda, eliminar los datos significa crear un sesgo para aquellos casos que no tienen un seguimiento registrado en el sistema. 
+
+Otro punto importante a realizar en esta etapa corresponde a la homologación de los datos, por ejemplo, los datos nulos del dataset se pueden considerar como: "", "NA", "N/A", u otros, lo que genera una desnormalización del manejo de datos. Tomar una decisión para tener datos consistentes en este aspecto es fundamental.
+
+Asimismo, la identificación de datos duplicados nos previene de sesgos en la información que a su vez afecta el cálculo de las medidas estadísticas que serán aplicadas. Otro aspecto es la validación de datos correctos, cómo las fechas o valores inconsistentes sobre entidades federativas.
+
+<h2>Tareas de Transformación</h2>
+
+Las columnas originales del dataset fueron diseñadas para el registro administrativo, no para el análisis estadístico. Por eso la transformación tiene un papel central en esta etapa. Esto lo podemos identificar con la fecha de desaparición, convertir el dato a formato datetime no es solo un requisito técnico, sino que permite responder preguntas como: ¿en qué año se concentran más desapariciones?, ¿hay meses con mayor incidencia?, ¿cuánto tiempo lleva desaparecida cada persona sin ser localizada?
+
+De igual forma, convertir las columnas booleanas como bg_1, bg_2 y rnpdno_csv a su tipo correcto evita que el análisis las interprete como si tuvieran magnitud numérica. Un promedio de bg_2 podría interpretarse como una proporción de cobertura de la Búsqueda Generalizada, pero solo si se entiende su naturaleza binaria y no como una variable continua.
+
+<h2>Selección y Creación de Variables</h2>
+
+El dataset contiene columnas de trazabilidad técnica como DC_id, rnpdno_json, pre_rnped y rnped que fueron útiles para la construcción y cruce de las distintas versiones del registro nacional, pero que pueden no aportar valor al análisis exploratorio sobre el fenómeno de las desapariciones en sí. Excluirlas no significa que sean irrelevantes en términos institucionales, significa que para las preguntas de análisis planteadas en este proyecto, el foco debe estar en las variables que describen a la persona, el lugar, el tiempo y el estatus de búsqueda. Sin embargo, al analizar los datos deberá decidirse cuáles variables son importantes para las preguntas, si podemos obtener información sobre el impacto de la transición de los registros, entonces son variables que también se deben considerar.
+
+Las variables que no existen en el dataset original pero que se pueden construir a partir de él representan uno de los aportes más importantes de esta etapa. Saber el año o el mes de la desaparición, la década a la que pertenece el caso, cuántos años lleva la persona desaparecida sin ser localizada, o si su caso tiene un folio único asignado, son dimensiones que el dataset no entrega directamente pero que son fundamentales para entender la magnitud y evolución del problema.
+
+Por ejemplo, una variable que indique los años que lleva desaparecida una persona (calculada como la diferencia entre la fecha de desaparición y la fecha actual) permite dimensionar la cronicidad de los casos. Un caso con 15 o 20 años sin resolución no es estadísticamente equivalente a uno de hace seis meses, aunque ambos aparezcan como una sola fila en el registro.
+
+::: {.callout-note title="Limitaciones"}
+Es importante reconocer que la limpieza de datos no corrige el subregistro estructural del fenómeno. Este dataset contiene únicamente los casos que fueron denunciados y registrados formalmente. Las personas desaparecidas cuyos casos nunca llegaron al sistema institucional no aparecen en ninguna fila, y ninguna técnica de preparación de datos puede compensar esa ausencia. Esta limitación debe mantenerse presente a lo largo de todo el análisis como parte de la interpretación honesta de los hallazgos.
+:::
+
+::: {.callout-note title="Nota"}
+La limpieza del dataset se despliega con mayor detalle en [Documentación: Limpieza del dataset](#pestaña-limpieza)
+:::
+
 ### Modelado
 
 ### Evaluación
@@ -296,7 +328,7 @@ A partir de la exploración inicial del dataset se planetan las siguientes hipó
 
 
 
-# Documentación: Limpieza del dataset
+# Documentación: Limpieza del dataset {#pestaña-limpieza}
 
 ## Documentación {.tabset}
 
