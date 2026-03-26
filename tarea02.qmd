@@ -13,11 +13,14 @@ execute:
   warning: false
   echo: false
 ---
+
 ```{python}
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.impute import KNNImputer
+from sklearn.preprocessing import OrdinalEncoder
 
 df = pd.read_csv("data/tot_reg_desap.csv")
 ```
@@ -96,6 +99,7 @@ Con el presente trabajo se busca lograr un análisis exploratorio que derive en 
 ::: {.card}
 Para proceder con el análisis de los datos se cuenta con un dataset con formato CSV que contiene información de los registros de personas desaparecidas en México. A continuación se presenta una descripción de las columnas que contiene el dataset junto con su descripción, tipo de dato y tipo estadístico. 
 :::
+
 ```{python}
 #| title: "Diccionario de datos"
 #| echo: false
@@ -181,18 +185,12 @@ diccionario = pd.DataFrame([
 tabla_con_estilo = diccionario.style \
     .set_properties(**{"text-align": "left", "font-size": "13px"}) \
     .set_table_styles([
-        # encabezado
-        {"selector": "th", "props": [("background-color", "#4d2c18"), ("color", "white"), ("font-weight", "bold"), ("font-size", "14px"), ("text-align", "left"), ("padding", "10px")]},
-        
-        # celdas
+        {"selector": "th", "props": [("background-color", "#f3b5ff"), ("color", "white"), ("font-weight", "bold"), ("font-size", "14px"), ("text-align", "left"), ("padding", "10px")]},
         {"selector": "td", "props": [("vertical-align", "top"), ("padding", "8px 10px"), ("border-bottom", "1px solid #dcb685")]},
-        
-        # hover
-        {"selector": "tr:hover td", "props": [("background-color", "#D6EAF8"), ("color", "#000000")]},
+        {"selector": "tr:hover td", "props": [("background-color", "rgb(213, 115, 226)"), ("color", "#000000")]},
     ]) \
     .hide(axis="index")
 
-# Usamos display() para que Quarto dibuje el HTML generado
 display(tabla_con_estilo)
 ```
 
@@ -269,6 +267,7 @@ missing.style \
 - Para la fecha de desaparición registrada se maneja como una cadena, por lo que durante el análisis puede generar complicaciones.
 - Durante la observación de los registros la columna DC_id contiene identificadores compuestos con texto y múltiples valores concatenados (por ejemplo, "349 (json), 448 (csv), UUID (fub)"), lo que la hace no directamente analizable como variable numérica o categórica simple. Su utilidad es técnica y de trazabilidad, no analítica.
 :::
+
 ::: {.card}
 <h2>Hipótesis Preliminares</h2>
 
@@ -371,31 +370,826 @@ En el marco de este proyecto enfocado en la crisis de personas desaparecidas en 
 
 Como resultado se realiza un reporte con el desarrollo y resultados de todo el proceso de la información que va desde la comprensión de la problemática hasta la presentación de hallazgos con sustento cuantitativo y herramientas de visualización que permitan comunicar el análisis llevado a cabo, y el dataset limpio y transformado con las debidas justificaciones de las decisiones tomada al respecto.
 
-# Medidas, Visualización e Interpretación
-
-
-
-
 # Documentación: Limpieza del dataset {#pestaña-limpieza}
+
+## Introducción
+
+La calidad y confiabilidad de los resultados en cualquier proyecto de minería de datos dependen directamente de la integridad y estructura del conjunto de datos original. En el contexto de los registros oficiales de personas desaparecidas en México (RNPED y RNPDNO), el dataset en su formato crudo presenta múltiples desafíos técnicos inherentes a su captura administrativa y origen gubernamental. Entre estos retos destacan la presencia de inconsistencias tipográficas, formatos de fecha anómalos o múltiples, una alta prevalencia de valores nulos no estandarizados y variables de trazabilidad codificadas con tipos de datos incorrectos.
+
+El objetivo de esta fase de limpieza y preparación es transformar la base de datos original sin alterar la realidad histórica que representan los registros. A continuación, se documentan de manera transparente y detallada todas las decisiones técnicas aplicadas al dataset. Este proceso asegura la reproducibilidad del análisis y abarca el tratamiento de valores faltantes, la revisión de duplicados, la corrección de tipos de datos, la normalización de categorías y la validación rigurosa de inconsistencias lógicas.
 
 ## Documentación {.tabset}
 
+
+### Normalización
+
+::: {.card}
+La normalización es el proceso técnico de estandarizar, corregir y unificar los valores de texto y las variables categóricas dentro del dataset. La normalización de categorías tuvo como objetivo garantizar que valores que representan el mismo concepto sean reconocidos como idénticos por pandas, evitando que diferencias superficiales de formato generen categorías duplicadas en el análisis. Por otro lado, la normalización de texto nos permite más legibilidad y confiabilidad en los datos.
+
+Para un algoritmo o función de agrupación en Pandas, cualquier ligera variación (un espacio extra, un acento, una letra minúscula) hace que el dato sea interpretado como una categoría completamente diferente. Esto fragmentaría los resultados y arruinaría cualquier análisis estadístico. A continuación de detallan las acciones tomadas para cubrir este aspecto.
+:::
+
+::: {.card}
+<h3>Nombres de personas en el registro</h3>
+
+Se aplicaron tres transformaciones: conversión a mayúsculas, eliminación de espacios al inicio y al final, y colapso de espacios internos múltiples en un único espacio.
+
+```{python}
+#| echo: True
+#| title: "Normalización de nombres"
+df['nombrecompleto'] = df['nombrecompleto'].str.upper().str.strip()
+df['nombrecompleto'] = df['nombrecompleto'].str.replace(r'\s+', ' ', regex=True)
+```
+
+:::
+::: {.card}
+<h3>Entidades federativas</h3>
+
+Además de la conversión a mayúsculas y la eliminación de espacios, se aplicó una normalización de caracteres Unicode para eliminar acentos. El resultado es que "QUERÉTARO" y "QUERETARO" quedan representados de forma idéntica, evitando que aparezcan como dos entidades distintas en el análisis.
+
+```{python}
+#| echo: True
+#| title: "Normalización de entidades"
+df['entidad_desap'] = df['entidad_desap'].str.upper().str.strip()
+df['entidad_desap'] = (
+    df['entidad_desap']
+    .str.normalize('NFKD')
+    .str.encode('ascii', errors='ignore')
+    .str.decode('utf-8')
+)
+```
+
+:::
+::: {.card}
+<h3>Estatus de búsqueda</h3>
+
+Para esta columna se optó por capitalización en lugar de mayúsculas completas (es decir, primera letra mayúscula y el resto en minúsculas) dado que los valores de estatus son frases descriptivas y su presentación en mayúsculas completas dificultaría la lectura en tablas y visualizaciones del dashboard. Se aplicó también strip() para eliminar espacios al inicio y al final.
+
+```{python}
+#| echo: True
+#| title: "Normalización de estatus de búsqueda"
+df['estatus_busqueda'] = df['estatus_busqueda'].str.capitalize().str.strip()
+```
+
+:::
+
+### Tipos de Datos
+
+::: {layout-nrow=6}
+::: {layout-ncol=2}
+::: {.card width="70%"}
+Al empezar a trabajar con el dataset original se obtienen los siguientes tipos de datos:
+```{python}
+#| title: "Tipos de Datos Iniciales"
+tipos_datos = pd.DataFrame({
+    "Columna": df.columns,
+    "Tipo de dato": df.dtypes.astype(str).values
+})
+
+tipos_datos.style \
+    .set_properties(**{"font-size": "12px", "text-align": "left"}) \
+    .set_table_styles([
+        {"selector": "th", "props": [("background-color", "#4d2c18"), ("color", "white"), ("font-weight", "bold"), ("font-size", "14px"), ("text-align", "left"), ("padding", "10px")]},
+        {"selector": "td", "props": [("vertical-align", "top"), ("padding", "8px 10px"), ("border-bottom", "1px solid #dcb685")]},
+    ]) \
+    .hide(axis="index")
+```
+
+:::
+::: {.card width="30%"}
+Una vez cargado el dataset, pandas infiere automáticamente los tipos de datos de cada columna. Sin embargo, esta inferencia no siempre refleja la naturaleza real de los datos. Es por esto que se realizaron conversiones explícitas antes de cualquier análisis. Al realizar la exploración inicial de los datos en la etapa de Comprensión de los Datos en CRISP-DM observamos ciertas inconsistencias que dificultan el proceso de la información. A continuación se presentan los cambios realizados al dataset.
+:::
+:::
+
+::: {.card}
+<h3>Variables Booleanas</h3>
+
+Las columnas rnpdno_json, pre_rnped, rnped, rnpdno_csv, bg_1 y bg_2 fueron cargadas como int64 con valores 0 y 1 (su interpretación se presenta en el diccionario en [Comprensión de los Datos](#crisp-dm)). Aunque numéricamente son equivalentes, tratarlas como enteros permitiría operaciones sin sentido sobre ellas, como calcular su promedio o aplicarles transformaciones aritméticas. Al convertirlas a tipo bool se establece explícitamente que representan una condición binaria, lo que restringe las operaciones válidas sobre ellas y comunica correctamente su significado dentro del dataset.
+
+```{python}
+#| echo: true
+#| title: "Transformación valores booleanos"
+columnas_booleanas = ['rnpdno_json', 'pre_rnped', 'rnped', 'rnpdno_csv', 'bg_1', 'bg_2']
+for col in columnas_booleanas:
+    df[col] = df[col].astype(bool)
+```
+
+:::
+
+::: {.card}
+<h3>Variables con Texto</h3>
+
+Las columnas nombrecompleto, fub y DC_id fueron convertidas al tipo string de pandas, distinto del tipo genérico object. Esta distinción es relevante porque el tipo string maneja los valores nulos como pd.NA en lugar de None o NaN, lo que hace más predecible y consistente el comportamiento al operar con texto y al detectar ausencias en estas columnas.
+
+```{python}
+#| echo: true
+#| title: "Transformación a tipo string"
+columnas_texto = ['nombrecompleto', 'fub', 'DC_id']
+for col in columnas_texto:
+    df[col] = df[col].astype('string')
+```
+
+:::
+
+::: {.card}
+<h3>Variables de Fecha</h3>
+
+Para la columna fecha_desap se cargo como cadena de texto, durante la revisión de los datos se encontraron registros con la presencia de múltiples fechas separadas por comas, además de valores nulos o formatos inconsistentes. 
+
+1. Debido a la presencia de cadenas con múltiples fechas registradas, se decidió extraer únicamente la primera fecha registrada, pues si a ese registro le asignan un folio FUB debe ser con la primera fecha registrada. Con esto, en lugar de eliminar el dato a nulo, obtenemos un acercamiento con la primera fecha registrada.
+2. Se homologaron todas las representaciones posibles de datos nulos a np.nan. 
+3. Por último, se aplica la conversión a datetime64 y cualquier valor que no pueda interpretarse como fecha válida se transforma a valor nulo.
+
+```{python}
+#| echo: true
+#| title: "Transformación a tipo datetime"
+df['fecha_desap'] = df['fecha_desap'].astype(str)
+df['fecha_desap'] = df['fecha_desap'].str.split(',').str[0].str.strip()
+df['fecha_desap'] = df['fecha_desap'].replace({
+    'NA': np.nan, 'nan': np.nan, '<NA>': np.nan, 'None': np.nan, '': np.nan
+})
+df['fecha_desap'] = pd.to_datetime(
+    df['fecha_desap'], format='mixed', dayfirst=True, errors='coerce'
+)
+```
+
+:::
+
+::: {.card}
+<h3>Variables Categóricas</h3>
+
+Columnas como entidad_desap o estatus_busqueda aparecen inicialmente como un tipo de dato de cadena de texto, por lo que dado su significado resulta conveniente convertirlos a un tipo category no sin antes normalizar su contenido como se menciona en la sección correspondiente. 
+
+Esta conversión es apropiada porque ambas columnas tienen un número reducido y finito de valores posibles (los estados de la república y los estatus de búsqueda definidos) y no representan texto libre. El tipo category reduce el uso de memoria significativamente en datasets grandes y permite operaciones de agrupación más eficientes. Es importante destacar que esta conversión se realizó después de la normalización de texto, para garantizar que las categorías registradas sean uniformes y no existan duplicados implícitos por diferencias de capitalización o espacios.
+
+```{python}
+#| echo: true
+#| title: "Transformación a tipo category"
+df['entidad_desap'] = df['entidad_desap'].astype('category')
+df['estatus_busqueda'] = df['estatus_busqueda'].astype('category')
+```
+
+:::
+
+::: {.card}
+<h2>Resultado</h2>
+
+```{python}
+#| title: "Tipos de Datos Finales"
+tipos_datos = pd.DataFrame({
+    "Columna": df.columns,
+    "Tipo de dato": df.dtypes.astype(str).values
+})
+
+tipos_datos.style \
+    .set_properties(**{"font-size": "12px", "text-align": "left"}) \
+    .set_table_styles([
+        {"selector": "th", "props": [("background-color", "#4d2c18"), ("color", "white"), ("font-weight", "bold"), ("font-size", "14px"), ("text-align", "left"), ("padding", "10px")]},
+        {"selector": "td", "props": [("vertical-align", "top"), ("padding", "8px 10px"), ("border-bottom", "1px solid #dcb685")]},
+    ]) \
+    .hide(axis="index")
+```
+
+:::
+:::
+
 ### Valores Faltantes
+
+::: {.layout-nrow=5}
+::: {.card}
+A partir de las variables observadas en el dataset, como se menciono en la Comprensión de Datos de la metodología CRISP-DM, existen columnas con datos faltantes. Antes de tomar cualquier decisión sobre estos datos, es importante conocer la proporción de estos con respecto al total de los registros. Es importante mencionar que no todas las ausencias tienen el mismo oigen ni la misma solución, en el cotexto de las desapariciones de personas en México, un valor faltante puede significar desde un error de captura hasta una limitación en el sistema de registro. En ambos casos, es importante detallar las decisia no generar sesgos en la información.
+
+```{python}
+#| echo: false
+#| title: "Valores Faltantes"
+df = pd.read_csv("data/tot_reg_desap.csv")
+
+missing = pd.DataFrame({
+    "Columna": df.columns,
+    "Valores faltantes": df.isnull().sum().values,
+    "Porcentaje (%)": ((df.isnull().sum().values / len(df)) * 100).round(2),
+    "Tipo inferido": df.dtypes.astype(str).values
+})
+
+missing.style \
+    .set_properties(**{"font-size": "12px", "text-align": "left"}) \
+    .set_table_styles([
+        {"selector": "th", "props": [("background-color", "#4d2c18"), ("color", "white"), ("font-weight", "bold"), ("font-size", "14px"), ("text-align", "left"), ("padding", "10px")]},
+        {"selector": "td", "props": [("vertical-align", "top"), ("padding", "8px 10px"), ("border-bottom", "1px solid #dcb685")]},
+    ]) \
+    .background_gradient(subset=["Porcentaje (%)"], cmap="Reds") \
+    .hide(axis="index")
+```
+
+:::
+::: {.card}
+<h2>Ausencia de estatus de búsqueda</h2>
+
+La columna estatus_busqueda presentó un total de 27,364 registros nulos, representando el 30.5% del conjunto de datos. Un registro sin estatus representa un reto en la problemática que presenta el país, pues tenemos una pérdida de información del estado de miles de personas desaparecidas.
+
+El estatus de búsqueda de un caso tiene mayor probabilidad de parecerse al de otros casos registrados en la misma entidad federativa, dado que las condiciones institucionales y operativas de búsqueda varían por estado.Es por esto que para el diagnóstico de esta variable se decidió realizar imputación mediante el algoritmo KNN (K-Nearest Neighbors), utilizando la variable correspondiente a la entidad de desaparición como dato auxiliar. 
+
+Así, se implementó un algoritmo que identifiva los 5 registros más similares en términos de entidad y les asigna el estatus más frecuente entre ellos. Para aplicar KNN fue necesario codificar numéricamente las variables categóricas mediante OrdinalEncoder, ejecutar la imputación y luego decodificar los valores de regreso a sus etiquetas originales.
+
+```{python}
+#| echo: true
+#| title: "Algoritmo KNN para estatus de búsqueda"
+cols = ['entidad_desap', 'estatus_busqueda']
+df_knn = df[cols].copy()
+
+encoder = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=np.nan)
+df_encoded = encoder.fit_transform(df_knn)
+
+imputer = KNNImputer(n_neighbors=5)
+df_imputed = imputer.fit_transform(df_encoded)
+df_imputed = np.round(df_imputed)
+
+df_decoded = encoder.inverse_transform(df_imputed)
+df['estatus_busqueda'] = df_decoded[:, 1]
+df['estatus_busqueda'] = df['estatus_busqueda'].astype('category')
+nulos_estatus = df['estatus_busqueda'].isnull().sum()
+```
+
+De este modo, los nulos tras la aplicación del KNN para el estatus de búsqueda son: **`{python} nulos_estatus`**.
+:::
+
+::: {.card}
+<h2>Folio Único de Búsqueda y DC_id</h2>
+
+Dado que estas dos columnas son identificadores técnicos del sistema de registro, su ausencia no puede darnos espacio a imputar con identificadores inventados, pues se introducirían registros falsos en el sistema de trazabilidad y no aportaría ningún valor analítico de acuerdo a los objetivos que se plantearon en este trabajo.
+
+De esta manera, ambas columnas se conservan con sus nulos originales y se excluyen de cualquier análisis estadístico que requiera valores completos.
+:::
+
+::: {.card}
+<h2>Ausencia de Fecha de Desaparición</h2>
+
+Nuevamente, la ausencia de esta información representa un reto en el análisis de las desapariciones. Esta es una variable central para el análisis temporal del dataset, sin embargo, imputar fechas en un dataset de derechos humanos requiere de especial cuidado, pues asignar fechahs arbitrarias a la desaparición de las personas puede distorsionar los patrones temporales y llevar a conclusiones incorrectas sobre los detalles de los hechos.
+
+Con la consideración anterior, se optó por una imputación basada en la moda de fechas dentro de cada entidad federativa. Así, para cada registro con fecha faltante, se identifica la fecha de desaparición más frecuente entre todos los casos del mismo estado y se le asigna un valor.
+
+```{python}
+#| echo: true
+#| title: "Imputación de las fechas de desaparición por moda"
+moda_por_entidad = df.groupby('entidad_desap')['fecha_desap'].transform(
+    lambda x: x.mode()[0] if not x.mode().empty else pd.NaT
+)
+df['fecha_desap'] = df['fecha_desap'].fillna(moda_por_entidad)
+nulos_fecha = df['fecha_desap'].isnull().sum()
+```
+
+De este modo, los nulos tras la aplicación de la imputación para la fecha de desaparición son: **`{python} nulos_fecha`**.
+
+::: {.callout-warning}
+La fecha imputada no representa la fecha real de desaparición de cada persona, sino la fecha más frecuente registrada en su entidad. Esto introduce un sesgo de concentración en ciertas fechas dentro del análisis temporal, por lo que dichos resultados deben interpretarse considerando que un subconjunto de ellos (el 7.7%) tiene fechas aproximadas y no reales.
+:::
+:::
+
+::: {.card}
+Tras aplicar los tratamientos describos, las únicas columnas que conservan valores nulos son fub y DC_id, cuya ausencia es intencional y justificada.
+
+```{python}
+#| echo: false
+#| title: "Resultado Valores Faltantes"
+missing = pd.DataFrame({
+    "Columna": df.columns,
+    "Valores faltantes": df.isnull().sum().values,
+    "Porcentaje (%)": ((df.isnull().sum().values / len(df)) * 100).round(2),
+    "Tipo inferido": df.dtypes.astype(str).values
+})
+
+missing.style \
+    .set_properties(**{"font-size": "12px", "text-align": "left"}) \
+    .set_table_styles([
+        {"selector": "th", "props": [("background-color", "#4d2c18"), ("color", "white"), ("font-weight", "bold"), ("font-size", "14px"), ("text-align", "left"), ("padding", "10px")]},
+        {"selector": "td", "props": [("vertical-align", "top"), ("padding", "8px 10px"), ("border-bottom", "1px solid #dcb685")]},
+    ]) \
+    .background_gradient(subset=["Porcentaje (%)"], cmap="Reds") \
+    .hide(axis="index")
+```
+:::
+:::
 
 ### Duplicados
 
-### Tipos de Datos Correctos
+Para identificar suplicados en el dataset actual además de considerar la existencia de filas completamente idénticas, se identifican registros que con el mismo nombre pueden corresponder a personas distintas, y que eliminar un caso real por considerarlo duplicado tendría implicaciones éticas sensibles.
 
-### Normalización
+::: {.card}
+Como primera verificación buscamos filas completamente idénticas en todas las columnas. Un duplicado exacto indica que el mismo registro fue ingresado más de una ve al sistema sin ninguna variación, lo que representa un error de captura o de integración entre las distintas fuentes del dataset. Si incluyendo fub, fecha_desap y estatus_busqueda son idénticas, se considera que es un registro repetido y se elimina la copia sin pérdida de información.
+
+```{python}
+#| echo: true
+#| title: "Detección de duplicados exactos"
+print("Duplicados totales:", df.duplicated().sum())
+df.drop_duplicates(inplace=True)
+print("Filas después de eliminar duplicados:", df.shape)
+```
+
+:::
+::: {.card}
+Por otro lado, se evalúa si existen registros con el mismo nombre y la misma fecha de desaparición que podrían representar a la misma persona registrada dos veces con ligeras diferencias en otros campos. Este caso es más delicado porque la coincidencia de nombre y fecha no garantiza que sea la misma persona.
+El criterio de diferenciación es el fub: si dos registros comparten nombre y fecha pero tienen folios distintos, se consideran personas diferentes y ambos se conservan. Si comparten nombre, fecha y fub, se trata del mismo caso y se elimina la copia.
+
+```{python}
+#| echo: true
+#| title: "Detección de duplicados semánticos"
+duplicados_semanticos = df.duplicated(
+    subset=["nombrecompleto", "fecha_desap", "fub"], keep=False
+)
+print("Posibles duplicados semánticos:", duplicados_semanticos.sum())
+print(df[duplicados_semanticos][["nombrecompleto", "fecha_desap", "fub"]])
+```
+
+:::
+::: {.callout-warning}
+En este dataset cada fila representa a una persona. Eliminar un registro sin certeza de que sea un duplicado equivale a borrar del análisis a una persona real. Por esta razón, solo se eliminan aquellos casos donde la evidencia de duplicidad es inequívoca, es decir, cuando coinciden nombre, fecha de desaparición y folio único de búsqueda simultáneamente.
+:::
+::: {.card}
+<h3>Resultado</h3>
+#| echo: true
+#| title: "Estado final del dataset tras limpieza de duplicados"
+print(f"Filas antes: 89720")
+print(f"Filas después: {df.shape[0]}")
+print(f"Registros eliminados: {89720 - df.shape[0]}")
+:::
 
 ### Validaciones
 
 
 
+# Medidas, Visualización e Interpretación
 
-# Hallazgos y Limitaciones
+```{python}
+#| echo: false
+import os
+os.makedirs("imgs", exist_ok=True)
 
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import entropy as scipy_entropy
+from IPython.display import display
 
+COLORES = {
+    "primario":   "#4d2c18",
+    "secundario": "#b3c54b",
+    "acento":     "#4abeb5",
+    "claro":      "#dcb685",
+    "fondo":      "#f9f5f0",
+    "texto":      "#2c2c2c",
+}
 
+plt.rcParams.update({
+    "figure.facecolor": COLORES["fondo"],
+    "axes.facecolor":   COLORES["fondo"],
+    "axes.edgecolor":   COLORES["texto"],
+    "axes.labelcolor":  COLORES["texto"],
+    "xtick.color":      COLORES["texto"],
+    "ytick.color":      COLORES["texto"],
+    "text.color":       COLORES["texto"],
+    "font.family":      "sans-serif",
+    "axes.titlesize":   13,
+    "axes.labelsize":   11,
+    "xtick.labelsize":  9,
+    "ytick.labelsize":  9,
+})
 
-# Conclusión
+def cargar_dataset_limpio(ruta="data/tot_reg_desap.csv"):
+    df = pd.read_csv(ruta)
+    df["entidad_desap"]    = df["entidad_desap"].astype("category")
+    df["estatus_busqueda"] = df["estatus_busqueda"].astype("category")
+    df["fecha_desap"]      = pd.to_datetime(df["fecha_desap"], format="mixed",
+                                             dayfirst=True, errors="coerce")
+    df["anio_desap"]       = df["fecha_desap"].dt.year
+    return df
+
+df    = cargar_dataset_limpio()
+anios = df["anio_desap"].dropna()
+
+def entropia_shannon(serie):
+    frecs = serie.dropna().value_counts(normalize=True)
+    H     = scipy_entropy(frecs, base=2)
+    H_max = np.log2(len(frecs)) if len(frecs) > 1 else 1
+    return H, H / H_max
+
+def indice_simpson(serie):
+    frecs = serie.dropna().value_counts(normalize=True)
+    return 1 - (frecs**2).sum()
+
+def gini_lorenz(serie):
+    vals     = np.sort(serie.dropna().value_counts().values.astype(float))
+    n        = len(vals)
+    lorenz_x = np.concatenate([[0], np.cumsum(np.ones(n)) / n])
+    lorenz_y = np.concatenate([[0], np.cumsum(vals) / vals.sum()])
+    gini     = 1 - 2 * np.trapezoid(lorenz_y, lorenz_x)
+    return gini, lorenz_x, lorenz_y
+
+def estilo_tabla(df_tabla):
+    return (
+        df_tabla.style
+        .set_properties(**{"text-align": "left", "font-size": "13px"})
+        .set_table_styles([
+            {"selector": "th", "props": [
+                ("background-color", "#4d2c18"), ("color", "white"),
+                ("font-weight", "bold"), ("padding", "10px")]},
+            {"selector": "td", "props": [
+                ("padding", "8px 12px"), ("border-bottom", "1px solid #dcb685")]},
+            {"selector": "tr:hover td", "props": [("background-color", "#f0e8d8")]},
+        ])
+        .hide(axis="index")
+    )
+
+# ── Pre-calcular todo ────────────────────────────────────────
+media        = anios.mean()
+mediana      = anios.median()
+moda_val     = anios.mode()[0]
+p25          = anios.quantile(0.25)
+p75          = anios.quantile(0.75)
+p90          = anios.quantile(0.90)
+moda_entidad = df["entidad_desap"].mode()[0]
+moda_estatus = df["estatus_busqueda"].dropna().mode()[0]
+
+varianza = anios.var()
+std      = anios.std()
+rango    = anios.max() - anios.min()
+iqr      = p75 - p25
+cv       = (std / media) * 100
+
+H_ent,  H_norm_ent  = entropia_shannon(df["entidad_desap"])
+H_est,  H_norm_est  = entropia_shannon(df["estatus_busqueda"])
+D_ent  = indice_simpson(df["entidad_desap"])
+D_est  = indice_simpson(df["estatus_busqueda"])
+n_cat_ent = df["entidad_desap"].nunique()
+n_cat_est = df["estatus_busqueda"].dropna().nunique()
+
+gini_ent,  lx_e, ly_e = gini_lorenz(df["entidad_desap"])
+gini_anio, lx_a, ly_a = gini_lorenz(df["anio_desap"])
+frec_sorted  = df["entidad_desap"].value_counts().sort_values(ascending=False)
+n_tot        = len(frec_sorted)
+n_top20      = max(1, int(np.ceil(n_tot * 0.20)))
+pct_top20    = frec_sorted.head(n_top20).sum() / frec_sorted.sum() * 100
+top3_estados = ", ".join(frec_sorted.head(3).index.tolist())
+```
+
+## Row {.tabset}
+
+### 📍 Localización — Tabla
+
+```{python}
+#| echo: false
+tabla_loc = pd.DataFrame([
+    {"Medida": "Media (año desaparición)",    "Valor": f"{media:.1f}",    "Variable": "anio_desap"},
+    {"Medida": "Mediana (año desaparición)",  "Valor": f"{mediana:.0f}",  "Variable": "anio_desap"},
+    {"Medida": "Moda (año desaparición)",     "Valor": f"{moda_val:.0f}", "Variable": "anio_desap"},
+    {"Medida": "Percentil 25 (Q1)",           "Valor": f"{p25:.0f}",      "Variable": "anio_desap"},
+    {"Medida": "Percentil 75 (Q3)",           "Valor": f"{p75:.0f}",      "Variable": "anio_desap"},
+    {"Medida": "Percentil 90",                "Valor": f"{p90:.0f}",      "Variable": "anio_desap"},
+    {"Medida": "Moda (entidad federativa)",   "Valor": moda_entidad,      "Variable": "entidad_desap"},
+    {"Medida": "Moda (estatus de búsqueda)",  "Valor": moda_estatus,      "Variable": "estatus_busqueda"},
+])
+display(estilo_tabla(tabla_loc))
+```
+
+### 📍 Localización — Gráfica
+
+```{python}
+#| echo: false
+fig, axes = plt.subplots(1, 2, figsize=(13, 4))
+fig.suptitle("Medidas de Localización", fontsize=14,
+             fontweight="bold", color=COLORES["primario"])
+
+ax = axes[0]
+ax.hist(anios, bins=40, color=COLORES["claro"],
+        edgecolor=COLORES["primario"], linewidth=0.5)
+ax.axvline(media,    color=COLORES["primario"],   lw=2, ls="-",  label=f"Media   {media:.0f}")
+ax.axvline(mediana,  color=COLORES["acento"],     lw=2, ls="--", label=f"Mediana {mediana:.0f}")
+ax.axvline(moda_val, color=COLORES["secundario"], lw=2, ls=":",  label=f"Moda    {moda_val:.0f}")
+ax.axvspan(p25, p75, alpha=0.12, color=COLORES["acento"],
+           label=f"IQR ({p25:.0f}–{p75:.0f})")
+ax.set_title("Distribución del Año de Desaparición")
+ax.set_xlabel("Año"); ax.set_ylabel("Número de casos")
+ax.legend(fontsize=8)
+
+ax2 = axes[1]
+top10 = df["entidad_desap"].value_counts().head(10)
+bar_colors = [COLORES["primario"] if e == moda_entidad else COLORES["claro"]
+              for e in top10.index[::-1]]
+bars = ax2.barh(range(len(top10)), top10.values[::-1],
+                color=bar_colors, edgecolor="white", linewidth=0.3)
+ax2.set_yticks(range(len(top10)))
+ax2.set_yticklabels(top10.index[::-1], fontsize=8)
+ax2.set_title("Top 10 Entidades (moda resaltada)")
+ax2.set_xlabel("Número de casos")
+for bar, val in zip(bars, top10.values[::-1]):
+    ax2.text(bar.get_width() + 30, bar.get_y() + bar.get_height()/2,
+             f"{val:,}", va="center", fontsize=7.5)
+plt.tight_layout()
+plt.show()
+```
+
+### 📍 Localización — Interpretación
+
+La distribución temporal de los registros muestra una **asimetría positiva**: la media (**`{python} f"{media:.0f}"`**) se ubica por encima de la mediana (**`{python} f"{mediana:.0f}"`**), lo que indica que casos con fechas muy recientes jalan la media hacia adelante. La moda (**`{python} f"{moda_val:.0f}"`**) es el año con mayor volumen de registros, coincidiendo con el periodo de consolidación del RNPDNO.
+
+El percentil 90 (**`{python} f"{p90:.0f}"`**) indica que nueve de cada diez registros corresponden a desapariciones ocurridas antes de ese año. La entidad federativa más frecuente es **`{python} moda_entidad`**, lo que refleja la concentración geográfica del fenómeno, tema que se profundiza en las medidas de concentración.
+
+## Row {.tabset}
+
+### 📊 Variabilidad — Tabla
+
+```{python}
+#| echo: false
+tabla_var = pd.DataFrame([
+    {"Medida": "Varianza",                    "Valor": f"{varianza:.2f}", "Unidad": "años²"},
+    {"Medida": "Desviación estándar",         "Valor": f"{std:.2f}",      "Unidad": "años"},
+    {"Medida": "Rango total",                 "Valor": f"{rango:.0f}",    "Unidad": f"años  ({anios.min():.0f}–{anios.max():.0f})"},
+    {"Medida": "Rango intercuartílico (IQR)", "Valor": f"{iqr:.0f}",      "Unidad": "años"},
+    {"Medida": "Coeficiente de variación",    "Valor": f"{cv:.1f} %",     "Unidad": "relativo"},
+])
+display(estilo_tabla(tabla_var))
+```
+
+### 📊 Variabilidad — Gráfica
+
+```{python}
+#| echo: false
+fig, axes = plt.subplots(1, 2, figsize=(13, 4))
+fig.suptitle("Medidas de Variabilidad", fontsize=14,
+             fontweight="bold", color=COLORES["primario"])
+
+ax = axes[0]
+ax.boxplot(anios.dropna(), vert=True, patch_artist=True,
+           medianprops=dict(color=COLORES["primario"], lw=2.5),
+           boxprops=dict(facecolor=COLORES["claro"], color=COLORES["primario"]),
+           whiskerprops=dict(color=COLORES["texto"], lw=1.2),
+           capprops=dict(color=COLORES["texto"], lw=1.2),
+           flierprops=dict(marker="o", color=COLORES["acento"],
+                           alpha=0.25, markersize=3))
+ax.set_title("Boxplot — Año de Desaparición")
+ax.set_ylabel("Año"); ax.set_xticks([])
+for label, val in [(f"Mediana {mediana:.0f}", mediana),
+                   (f"Q1 {p25:.0f}", p25),
+                   (f"Q3 {p75:.0f}", p75)]:
+    ax.annotate(label, xy=(1, val), xytext=(1.28, val), fontsize=8,
+                color=COLORES["primario"], va="center",
+                arrowprops=dict(arrowstyle="-", color=COLORES["primario"]))
+
+ax2 = axes[1]
+top6   = df["entidad_desap"].value_counts().head(6).index.tolist()
+subset = df[df["entidad_desap"].isin(top6)][["entidad_desap","anio_desap"]].dropna()
+grupos = [subset[subset["entidad_desap"]==e]["anio_desap"].values for e in top6]
+bp2    = ax2.boxplot(grupos, patch_artist=True,
+                     medianprops=dict(color=COLORES["primario"], lw=2))
+pal = [COLORES["claro"], COLORES["acento"], COLORES["secundario"],
+       "#e8b4a0", "#a0c4e8", "#c4a0e8"]
+for patch, col in zip(bp2["boxes"], pal):
+    patch.set_facecolor(col)
+ax2.set_xticklabels([e[:14] for e in top6], rotation=25, ha="right", fontsize=8)
+ax2.set_title("Variabilidad Temporal por Entidad (Top 6)")
+ax2.set_ylabel("Año de Desaparición")
+plt.tight_layout()
+plt.show()
+```
+
+### 📊 Variabilidad — Interpretación
+
+La desviación estándar de **`{python} f"{std:.1f}"`** años indica una dispersión considerable alrededor de la media temporal, abarcando desde los primeros casos históricos hasta el presente. El rango total de **`{python} f"{rango:.0f}"`** años confirma que el dataset integra varias décadas de registros.
+
+El rango intercuartílico de **`{python} f"{iqr:.0f}"`** años es especialmente informativo: el 50% central de los casos se concentra en una ventana temporal relativamente reciente. El coeficiente de variación de **`{python} f"{cv:.1f}"`%** refleja la dispersión relativa, atribuible en parte a la transición entre el RNPED y el RNPDNO. El boxplot por entidad muestra que algunas tienen mayor dispersión temporal —casos que abarcan décadas— mientras otras concentran sus registros en años recientes.
+
+## Row {.tabset}
+
+### 🔀 Heterogeneidad — Tabla
+
+```{python}
+#| echo: false
+tabla_het = pd.DataFrame([
+    {"Variable": "entidad_desap",
+     "Categorías": n_cat_ent,
+     "Entropía H (bits)": f"{H_ent:.3f}",
+     "H normalizada [0–1]": f"{H_norm_ent:.3f}",
+     "Índice Simpson D": f"{D_ent:.4f}"},
+    {"Variable": "estatus_busqueda",
+     "Categorías": n_cat_est,
+     "Entropía H (bits)": f"{H_est:.3f}",
+     "H normalizada [0–1]": f"{H_norm_est:.3f}",
+     "Índice Simpson D": f"{D_est:.4f}"},
+])
+display(estilo_tabla(tabla_het))
+```
+
+### 🔀 Heterogeneidad — Gráfica
+
+```{python}
+#| echo: false
+fig, axes = plt.subplots(1, 2, figsize=(13, 4))
+fig.suptitle("Medidas de Heterogeneidad — Entropía de Shannon e Índice de Simpson",
+             fontsize=13, fontweight="bold", color=COLORES["primario"])
+
+ax = axes[0]
+frec_ent   = df["entidad_desap"].value_counts()
+bar_colors = [COLORES["primario"]] + [COLORES["claro"]] * (len(frec_ent) - 1)
+ax.bar(range(len(frec_ent)), frec_ent.values,
+       color=bar_colors, edgecolor="white", linewidth=0.3)
+ax.set_xticks(range(len(frec_ent)))
+ax.set_xticklabels(frec_ent.index, rotation=75, ha="right", fontsize=6.5)
+ax.set_title(f"Distribución por Entidad Federativa\n"
+             f"H={H_ent:.2f} bits | H_norm={H_norm_ent:.3f} | D={D_ent:.4f}")
+ax.set_ylabel("Número de casos")
+
+ax2 = axes[1]
+frec_est    = df["estatus_busqueda"].value_counts()
+bar_colors2 = [COLORES["acento"]] + [COLORES["claro"]] * (len(frec_est) - 1)
+ax2.barh(range(len(frec_est)), frec_est.values,
+         color=bar_colors2, edgecolor="white", linewidth=0.3)
+ax2.set_yticks(range(len(frec_est)))
+ax2.set_yticklabels(frec_est.index, fontsize=8)
+ax2.invert_yaxis()
+ax2.set_title(f"Distribución de Estatus de Búsqueda\n"
+              f"H={H_est:.2f} bits | H_norm={H_norm_est:.3f} | D={D_est:.4f}")
+ax2.set_xlabel("Número de casos")
+for i, val in enumerate(frec_est.values):
+    ax2.text(val + 50, i, f"{val:,}", va="center", fontsize=7.5)
+plt.tight_layout()
+plt.show()
+```
+
+### 🔀 Heterogeneidad — Interpretación
+
+La **entropía de Shannon normalizada** para `entidad_desap` es **`{python} f"{H_norm_ent:.3f}"`** (escala 0–1, donde 1 = distribución perfectamente uniforme). Esto indica que, aunque los `{python} n_cat_ent` estados están representados, la distribución **no es uniforme**: algunas entidades concentran significativamente más casos. El índice de Simpson de **`{python} f"{D_ent:.4f}"`** representa la probabilidad de que dos registros al azar provengan de entidades distintas.
+
+Para `estatus_busqueda`, la entropía normalizada de **`{python} f"{H_norm_est:.3f}"`** con `{python} n_cat_est` categorías refleja una distribución heterogénea. Un estatus dominante puede indicar reclasificación administrativa masiva, lo cual introduce un sesgo oficialista en el análisis.
+
+## Row {.tabset}
+
+### 📐 Concentración — Tabla
+
+```{python}
+#| echo: false
+tabla_conc = pd.DataFrame([
+    {"Variable": "entidad_desap",
+     "Índice de Gini": f"{gini_ent:.4f}",
+     "Interpretación": f"Top 20% de entidades ({n_top20} estados) concentran {pct_top20:.1f}% de casos"},
+    {"Variable": "anio_desap",
+     "Índice de Gini": f"{gini_anio:.4f}",
+     "Interpretación": "Concentración temporal de registros por año"},
+])
+display(estilo_tabla(tabla_conc))
+```
+
+### 📐 Concentración — Gráfica
+
+```{python}
+#| echo: false
+fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+fig.suptitle("Medidas de Concentración — Curvas de Lorenz e Índice de Gini",
+             fontsize=13, fontweight="bold", color=COLORES["primario"])
+
+def plot_lorenz(ax, lx, ly, gini, titulo, color_curva):
+    ax.plot([0, 1], [0, 1], color="#999999", lw=1.2, ls="--", label="Igualdad perfecta")
+    ax.fill_between(lx, lx, ly, alpha=0.20, color=color_curva)
+    ax.plot(lx, ly, color=color_curva, lw=2.5, label=f"Curva de Lorenz\nGini = {gini:.4f}")
+    ax.set_xlim(0, 1); ax.set_ylim(0, 1)
+    ax.set_xlabel("Proporción acumulada de categorías")
+    ax.set_ylabel("Proporción acumulada de casos")
+    ax.set_title(titulo)
+    ax.legend(fontsize=9, loc="upper left")
+    ax.text(0.55, 0.08, f"Gini = {gini:.4f}", transform=ax.transAxes,
+            fontsize=13, fontweight="bold", color=color_curva)
+
+plot_lorenz(axes[0], lx_e, ly_e, gini_ent,
+            "Concentración por Entidad Federativa", COLORES["primario"])
+plot_lorenz(axes[1], lx_a, ly_a, gini_anio,
+            "Concentración por Año de Desaparición", COLORES["acento"])
+plt.tight_layout()
+plt.show()
+```
+
+### 📐 Concentración — Interpretación
+
+El **índice de Gini** para la distribución por entidad es **`{python} f"{gini_ent:.4f}"`**. Un valor de 0 indica distribución igualitaria; un valor de 1 indica concentración absoluta. El valor obtenido sugiere **concentración moderada-alta**: el 20% de entidades más afectadas (`{python} n_top20` estados — **`{python} top3_estados`** y otros) concentran el **`{python} f"{pct_top20:.1f}"`%** del total de casos, consistente con las regiones históricamente más afectadas por la violencia organizada.
+
+La curva de Lorenz temporal (Gini = **`{python} f"{gini_anio:.4f}"`**) muestra concentración en años recientes. Esta asimetría no refleja necesariamente un aumento real proporcional del fenómeno, sino posiblemente la mejora en sistemas de registro derivada de la Ley General de Desapariciones de 2017.
+
+# Correlación
+
+```{python}
+#| echo: false
+#| warning: false
+
+import seaborn as sns
+
+# Calcular matriz de correlación
+cols_corr = ["rnpdno_json", "pre_rnped", "rnped", "rnpdno_csv", "bg_1", "bg_2", "anio_desap"]
+df_corr = df[cols_corr].copy()
+
+for col in cols_corr:
+    df_corr[col] = pd.to_numeric(df_corr[col], errors="coerce")
+
+matriz = df_corr.corr(method="pearson")
+
+# Extraer pares únicos (sin diagonal ni duplicados)
+corr_pairs = (
+    matriz.where(np.tril(np.ones(matriz.shape), k=-1).astype(bool))
+    .stack()
+    .reset_index()
+)
+corr_pairs.columns = ["Variable 1", "Variable 2", "Correlación"]
+corr_pairs["Correlación abs"] = corr_pairs["Correlación"].abs()
+corr_pairs = corr_pairs.sort_values("Correlación abs", ascending=False)
+
+# Crear tabla con las más fuertes y más débiles
+tabla_corr_fuertes = corr_pairs.head(5)[["Variable 1", "Variable 2", "Correlación"]].copy()
+tabla_corr_fuertes["Tipo"] = "Más fuertes"
+tabla_corr_debiles = corr_pairs.tail(5)[["Variable 1", "Variable 2", "Correlación"]].copy()
+tabla_corr_debiles["Tipo"] = "Más débiles"
+
+tabla_corr = pd.concat([tabla_corr_fuertes, tabla_corr_debiles])
+```
+
+## Row {.tabset}
+
+### 📊 Tabla de correlaciones
+
+```{python}
+#| echo: false
+
+def estilo_tabla_corr(df_tabla):
+    return (
+        df_tabla.style
+        .format({"Correlación": "{:.4f}"})
+        .background_gradient(subset=["Correlación"], cmap="RdYlGn", vmin=-1, vmax=1)
+        .set_properties(**{"text-align": "left", "font-size": "13px"})
+        .set_table_styles([
+            {"selector": "th", "props": [("background-color","#4d2c18"),
+             ("color","white"),("font-weight","bold"),("padding","10px")]},
+            {"selector": "td", "props": [("padding","8px 12px"),
+             ("border-bottom","1px solid #dcb685")]},
+            {"selector": "tr:hover td", "props": [("background-color", "#f0e8d8")]},
+        ])
+        .hide(axis="index")
+    )
+
+display(estilo_tabla_corr(tabla_corr))
+```
+
+### 🗺️ Heatmap de Correlaciones
+
+```{python}
+#| echo: false
+
+fig, ax = plt.subplots(figsize=(8, 6))
+fig.patch.set_facecolor(COLORES["fondo"])
+ax.set_facecolor(COLORES["fondo"])
+
+sns.heatmap(
+    matriz,
+    annot=True,
+    fmt=".2f",
+    cmap="RdYlGn",
+    vmin=-1,
+    vmax=1,
+    center=0,
+    linewidths=0.5,
+    linecolor="#cccccc",
+    ax=ax,
+    annot_kws={"size": 9, "color": COLORES["texto"]},
+    cbar_kws={"shrink": 0.8}
+)
+
+ax.set_title(
+    "Matriz de Correlación — Variables de Registro",
+    fontsize=13,
+    fontweight="bold",
+    color=COLORES["primario"],
+    pad=15
+)
+ax.set_xticklabels(ax.get_xticklabels(), rotation=35, ha="right", fontsize=9)
+ax.set_yticklabels(ax.get_yticklabels(), rotation=0, fontsize=9)
+
+plt.tight_layout()
+plt.show()
+```
+
+### 📝 Interpretación
+
+```{python}
+#| echo: false
+
+# Top 3 correlaciones más fuertes y más débiles para usar en texto
+top3_fuertes = corr_pairs.head(3)
+top3_debiles = corr_pairs.tail(3)
+
+fuertes_str = "; ".join(
+    [f"{r['Variable 1']} ↔ {r['Variable 2']} ({r['Correlación']:.3f})"
+     for _, r in top3_fuertes.iterrows()]
+)
+debiles_str = "; ".join(
+    [f"{r['Variable 1']} ↔ {r['Variable 2']} ({r['Correlación']:.3f})"
+     for _, r in top3_debiles.iterrows()]
+)
+```
+
+Las **correlaciones más fuertes** encontradas son: **`{python} fuertes_str`**. Estas asociaciones reflejan la coherencia entre los distintos sistemas de registro —un caso presente en el RNPED o en la Búsqueda Generalizada tiende a aparecer también en otras bases, lo cual es esperable dado el proceso de migración institucional.
+
+Las **correlaciones más débiles** corresponden a: **`{python} debiles_str`**. La baja correlación con `anio_desap` confirma que el año de la desaparición no determina directamente si un caso fue incorporado a los registros más recientes, sugiriendo que la inclusión depende más de factores administrativos o políticos que de la antigüedad del caso.
