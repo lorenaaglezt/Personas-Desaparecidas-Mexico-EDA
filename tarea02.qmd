@@ -21,14 +21,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.impute import KNNImputer
 from sklearn.preprocessing import OrdinalEncoder
+import datetime as dt
 
 df = pd.read_csv("data/tot_reg_desap.csv")
 ```
 
 # Inicio
-
-## Row
-#### Objetivo
 
 Los derechos humanos buscan asegurar la dignidad de las personas, su propósito radica en salvaguardar y garantizar el bien común sin discriminar por raza, sexo, religión, edad, ideologías, entre otros aspectos. Asimismo, el reconocimiento de los derechos humanos a partir de 1948 (proclamados en la Declaración Universal de los Derechos Humanos por la ONU) señala derechos inherentes a los individuos por el hecho de ser humanos, proporcionando una protección a no sufrir tratos crueles, inhumanos o degradantes. 
 
@@ -39,16 +37,6 @@ México es un país que alberga tradiciones y costumbres inigualables, sin embar
 El objetivo del presente trabajo es analizar un conjunto de datos con información correspondiente a este fenómeno para identificar discrepancias históricas y aportar una perspectiva fundamentada en datos empíricos que contribuya a dimensionar esta crisis con mayor claridad. Para ello, contamos con un data set con información sobre los registros de las desapariciones de personas en México en formato csv.
 
 Además, en el desarrollo de este trabajo reconocemos la importancia de este tema que nos incumbe a todos como humanidad, es un tema que ha sembrado desesperanza no sólo en México, sino en varias partes del mundo, es por ello que lo debemos tratar con la delicadeza y detalle que merece.
-
-
-## Row
-#### Metologías
-
-
-
-
-# Dataset: Personas Desaparecidas en México
-
 
 
 
@@ -90,7 +78,7 @@ Para establecer el enfoque del análisis sobre los datos se plantean las siguien
 
 <h3>Criterio de Éxito</h3>
 
-Con el presente trabajo se busca lograr un análisis exploratorio que derive en hallazgos sobre el conjunto de datos sustentados con evidencia gráfica, cuantificando objetivamente las insoncistencias, omisiones o reclasificaciones entre los registros gubernamentales históricos y actuales. Técnicamente, el éxito se medirá por la capacidad de procesar los datos anidados y generar un archivo completamente limpio y estandarizado  que permita una toma de decisiones informada.
+Con el presente trabajo se busca lograr un análisis exploratorio que derive en hallazgos sobre el conjunto de datos sustentados con evidencia gráfica, cuantificando objetivamente las inconsistencias, omisiones o reclasificaciones entre los registros gubernamentales históricos y actuales. Técnicamente, el éxito se medirá por la capacidad de procesar los datos anidados y generar un archivo completamente limpio y estandarizado  que permita una toma de decisiones informada.
 
 ### Comprensión de los Datos
 
@@ -185,7 +173,7 @@ diccionario = pd.DataFrame([
 tabla_con_estilo = diccionario.style \
     .set_properties(**{"text-align": "left", "font-size": "13px"}) \
     .set_table_styles([
-        {"selector": "th", "props": [("background-color", "#f3b5ff"), ("color", "white"), ("font-weight", "bold"), ("font-size", "14px"), ("text-align", "left"), ("padding", "10px")]},
+        {"selector": "th", "props": [("background-color", "#60246c"), ("color", "white"), ("font-weight", "bold"), ("font-size", "14px"), ("text-align", "left"), ("padding", "10px")]},
         {"selector": "td", "props": [("vertical-align", "top"), ("padding", "8px 10px"), ("border-bottom", "1px solid #dcb685")]},
         {"selector": "tr:hover td", "props": [("background-color", "rgb(213, 115, 226)"), ("color", "#000000")]},
     ]) \
@@ -557,13 +545,11 @@ tipos_datos.style \
 
 ::: {.layout-nrow=5}
 ::: {.card}
-A partir de las variables observadas en el dataset, como se menciono en la Comprensión de Datos de la metodología CRISP-DM, existen columnas con datos faltantes. Antes de tomar cualquier decisión sobre estos datos, es importante conocer la proporción de estos con respecto al total de los registros. Es importante mencionar que no todas las ausencias tienen el mismo oigen ni la misma solución, en el cotexto de las desapariciones de personas en México, un valor faltante puede significar desde un error de captura hasta una limitación en el sistema de registro. En ambos casos, es importante detallar las decisia no generar sesgos en la información.
+A partir de las variables observadas en el dataset, como se menciono en la Comprensión de Datos de la metodología CRISP-DM, existen columnas con datos faltantes. Antes de tomar cualquier decisión sobre estos datos, es importante conocer la proporción de estos con respecto al total de los registros. Es importante mencionar que no todas las ausencias tienen el mismo origen ni la misma solución, en el contexto de las desapariciones de personas en México, un valor faltante puede significar desde un error de captura hasta una limitación en el sistema de registro. En ambos casos, es importante detallar las decisiones para no generar sesgos en la información.
 
 ```{python}
 #| echo: false
 #| title: "Valores Faltantes"
-df = pd.read_csv("data/tot_reg_desap.csv")
-
 missing = pd.DataFrame({
     "Columna": df.columns,
     "Valores faltantes": df.isnull().sum().values,
@@ -589,7 +575,7 @@ La columna estatus_busqueda presentó un total de 27,364 registros nulos, repres
 
 El estatus de búsqueda de un caso tiene mayor probabilidad de parecerse al de otros casos registrados en la misma entidad federativa, dado que las condiciones institucionales y operativas de búsqueda varían por estado.Es por esto que para el diagnóstico de esta variable se decidió realizar imputación mediante el algoritmo KNN (K-Nearest Neighbors), utilizando la variable correspondiente a la entidad de desaparición como dato auxiliar. 
 
-Así, se implementó un algoritmo que identifiva los 5 registros más similares en términos de entidad y les asigna el estatus más frecuente entre ellos. Para aplicar KNN fue necesario codificar numéricamente las variables categóricas mediante OrdinalEncoder, ejecutar la imputación y luego decodificar los valores de regreso a sus etiquetas originales.
+Así, se implementó un algoritmo que identifica los 5 registros más similares en términos de entidad y les asigna el estatus más frecuente entre ellos. Para aplicar KNN fue necesario codificar numéricamente las variables categóricas mediante OrdinalEncoder, ejecutar la imputación y luego decodificar los valores de regreso a sus etiquetas originales.
 
 ```{python}
 #| echo: true
@@ -607,7 +593,7 @@ df_imputed = np.round(df_imputed)
 df_decoded = encoder.inverse_transform(df_imputed)
 df['estatus_busqueda'] = df_decoded[:, 1]
 df['estatus_busqueda'] = df['estatus_busqueda'].astype('category')
-nulos_estatus = df['estatus_busqueda'].isnull().sum()
+nulos_estatus = int(df['estatus_busqueda'].isnull().sum())
 ```
 
 De este modo, los nulos tras la aplicación del KNN para el estatus de búsqueda son: **`{python} nulos_estatus`**.
@@ -624,7 +610,7 @@ De esta manera, ambas columnas se conservan con sus nulos originales y se excluy
 ::: {.card}
 <h2>Ausencia de Fecha de Desaparición</h2>
 
-Nuevamente, la ausencia de esta información representa un reto en el análisis de las desapariciones. Esta es una variable central para el análisis temporal del dataset, sin embargo, imputar fechas en un dataset de derechos humanos requiere de especial cuidado, pues asignar fechahs arbitrarias a la desaparición de las personas puede distorsionar los patrones temporales y llevar a conclusiones incorrectas sobre los detalles de los hechos.
+Nuevamente, la ausencia de esta información representa un reto en el análisis de las desapariciones. Esta es una variable central para el análisis temporal del dataset, sin embargo, imputar fechas en un dataset de derechos humanos requiere de especial cuidado, pues asignar fechas arbitrarias a la desaparición de las personas puede distorsionar los patrones temporales y llevar a conclusiones incorrectas sobre los detalles de los hechos.
 
 Con la consideración anterior, se optó por una imputación basada en la moda de fechas dentro de cada entidad federativa. Así, para cada registro con fecha faltante, se identifica la fecha de desaparición más frecuente entre todos los casos del mismo estado y se le asigna un valor.
 
@@ -635,7 +621,7 @@ moda_por_entidad = df.groupby('entidad_desap')['fecha_desap'].transform(
     lambda x: x.mode()[0] if not x.mode().empty else pd.NaT
 )
 df['fecha_desap'] = df['fecha_desap'].fillna(moda_por_entidad)
-nulos_fecha = df['fecha_desap'].isnull().sum()
+nulos_fecha = int(df['fecha_desap'].isnull().sum())
 ```
 
 De este modo, los nulos tras la aplicación de la imputación para la fecha de desaparición son: **`{python} nulos_fecha`**.
@@ -646,7 +632,7 @@ La fecha imputada no representa la fecha real de desaparición de cada persona, 
 :::
 
 ::: {.card}
-Tras aplicar los tratamientos describos, las únicas columnas que conservan valores nulos son fub y DC_id, cuya ausencia es intencional y justificada.
+Tras aplicar los tratamientos descritos, las únicas columnas que conservan valores nulos son fub y DC_id, cuya ausencia es intencional y justificada.
 
 ```{python}
 #| echo: false
@@ -672,8 +658,10 @@ missing.style \
 
 ### Duplicados
 
-Para identificar suplicados en el dataset actual además de considerar la existencia de filas completamente idénticas, se identifican registros que con el mismo nombre pueden corresponder a personas distintas, y que eliminar un caso real por considerarlo duplicado tendría implicaciones éticas sensibles.
-
+::: {.layout-nrow=4}
+::: {.card}
+Para identificar duplicados en el dataset actual además de considerar la existencia de filas completamente idénticas, se identifican registros que con el mismo nombre pueden corresponder a personas distintas, y que eliminar un caso real por considerarlo duplicado tendría implicaciones éticas sensibles.
+:::
 ::: {.card}
 Como primera verificación buscamos filas completamente idénticas en todas las columnas. Un duplicado exacto indica que el mismo registro fue ingresado más de una ve al sistema sin ninguna variación, lo que representa un error de captura o de integración entre las distintas fuentes del dataset. Si incluyendo fub, fecha_desap y estatus_busqueda son idénticas, se considera que es un registro repetido y se elimina la copia sin pérdida de información.
 
@@ -696,26 +684,165 @@ El criterio de diferenciación es el fub: si dos registros comparten nombre y fe
 duplicados_semanticos = df.duplicated(
     subset=["nombrecompleto", "fecha_desap", "fub"], keep=False
 )
-print("Posibles duplicados semánticos:", duplicados_semanticos.sum())
-print(df[duplicados_semanticos][["nombrecompleto", "fecha_desap", "fub"]])
+total = len(df)
+n_duplicados = int(duplicados_semanticos.sum())
+porcentaje = round(n_duplicados / total * 100, 2)
+
+print(f"Posibles duplicados semánticos : {n_duplicados}")
+print(f"Total de registros             : {total:,}")
+print(f"Porcentaje sobre el total      : {porcentaje}%")
+
+if n_duplicados > 0:
+    df[duplicados_semanticos][["nombrecompleto", "fecha_desap", "fub"]] \
+        .reset_index(drop=True) \
+        .head(10) \
+        .style \
+        .set_properties(**{"font-size": "12px", "text-align": "left"}) \
+        .set_table_styles([
+            {"selector": "th", "props": [
+                ("background-color", "#4d2c18"), ("color", "white"),
+                ("font-weight", "bold"), ("font-size", "14px"),
+                ("text-align", "left"), ("padding", "10px")
+            ]},
+            {"selector": "td", "props": [
+                ("padding", "8px 10px"),
+                ("border-bottom", "1px solid #dcb685")
+            ]},
+        ])
 ```
 
 :::
+::: {.card}
+<h3>Resultado</h3>
+
+Con aproximadamente 89,000 registros tras la limpieza, el dataset conserva una muestra ampliamente suficiente para sostener cualquier análisis estadístico con alta confiabilidad. Los duplicados semánticos eliminados representan menos del 2% del total, un porcentaje que estadísticamente se considera despreciable en datasets de esta escala.
+
 ::: {.callout-warning}
 En este dataset cada fila representa a una persona. Eliminar un registro sin certeza de que sea un duplicado equivale a borrar del análisis a una persona real. Por esta razón, solo se eliminan aquellos casos donde la evidencia de duplicidad es inequívoca, es decir, cuando coinciden nombre, fecha de desaparición y folio único de búsqueda simultáneamente.
 :::
-::: {.card}
-<h3>Resultado</h3>
-#| echo: true
-#| title: "Estado final del dataset tras limpieza de duplicados"
-print(f"Filas antes: 89720")
-print(f"Filas después: {df.shape[0]}")
-print(f"Registros eliminados: {89720 - df.shape[0]}")
+:::
 :::
 
 ### Validaciones
 
+::: {.layout-nrow=4}
+::: {.card}
+En esta sección se busca validar los datos contenidos mediante la revisión y búsqueda de datos anómalos. Se analizan principalmente las fechas y los rangos establecidos y los nombres para identificar falta de datos en esta variable.
+:::
 
+::: {.card}
+<h3>Fecha</h3>
+
+La fecha de desaparición debe cumplir dos condiciones para ser válida: no puede ser anterior a una fecha mínima razonable y no puede ser posterior a la fecha actual. Se estableció como límite inferior el 1 de enero de 1950, considerando que registros anteriores a esa fecha tendrían más de 75 años de antigüedad y su presencia en un sistema de registro moderno sería altamente sospechosa de error de captura. Los casos fuera de rango se documentan pero no se eliminan automáticamente cada caso requiere revisión individual antes de decidir si se trata de un error de captura o un registro legítimo.
+
+
+```{python}
+#| echo: true
+#| title: "Validación de rangos en fecha_desap"
+df["fecha_desap"] = pd.to_datetime(df["fecha_desap"], format="mixed", dayfirst=True, errors="coerce")
+
+fecha_min = pd.to_datetime("1950-01-01")
+fecha_max = pd.to_datetime(dt.date.today())
+
+fechas_invalidas = df[
+    (df["fecha_desap"] < fecha_min) |
+    (df["fecha_desap"] > fecha_max)
+]
+
+print(f"Fechas fuera de rango: {int(len(fechas_invalidas))}")
+
+if len(fechas_invalidas) > 0:
+    fechas_invalidas[["nombrecompleto", "fecha_desap", "entidad_desap"]] \
+        .reset_index(drop=True) \
+        .style \
+        .set_properties(**{"font-size": "12px", "text-align": "left"}) \
+        .set_table_styles([
+            {"selector": "th", "props": [
+                ("background-color", "#4d2c18"), ("color", "white"),
+                ("font-weight", "bold"), ("font-size", "14px"),
+                ("text-align", "left"), ("padding", "10px")
+            ]},
+            {"selector": "td", "props": [
+                ("padding", "8px 10px"),
+                ("border-bottom", "1px solid #dcb685")
+            ]},
+        ])
+else:
+    print("No se encontraron fechas fuera de rango.")
+```
+
+:::
+
+::: {.card}
+<h3>Nombres</h3>
+
+Los nombres de personas no deberían contener caracteres numéricos, símbolos especiales o cadenas que sugieran errores de captura. Se verificaron dos casos: nombres con dígitos y nombres con valores genéricos de relleno como `"DESCONOCIDO"` o `"NN"`. Los registros con nombres genéricos como `"NN"` (no nombrado) son legítimos en este contexto, representan personas no identificadas, y no se eliminan. Se documentan para considerarlos al interpretar resultados sobre nombres o frecuencias.
+
+```{python}
+#| echo: true
+#| title: "Validación de nombres con dígitos"
+nombres_numericos = df[df["nombrecompleto"].str.contains(r'\d', na=False)]
+print(f"Nombres con dígitos: {len(nombres_numericos)}")
+
+if len(nombres_numericos) > 0:
+    display(nombres_numericos[["nombrecompleto", "fecha_desap", "entidad_desap"]].head(10))
+```
+```{python}
+#| echo: true
+#| title: "Validación de nombres genéricos"
+valores_genericos = ["DESCONOCIDO", "SIN NOMBRE", "N/A", "NO IDENTIFICADO", "NN"]
+nombres_genericos = df[df["nombrecompleto"].isin(valores_genericos)]
+print(f"Nombres genéricos o de relleno: {len(nombres_genericos)}")
+
+if len(nombres_genericos) > 0:
+    display(nombres_genericos[["nombrecompleto", "fecha_desap", "entidad_desap"]])
+```
+
+:::
+
+::: {.card}
+<h2>Resultados</h2>
+
+```{python}
+#| echo: false
+#| title: "Resumen de validaciones"
+resumen = pd.DataFrame([
+    {
+        "Validación": "Fechas fuera de rango (< 1950 o > hoy)",
+        "Registros afectados": len(fechas_invalidas),
+        "Acción tomada": "Documentado, sin eliminación automática"
+    },
+    {
+        "Validación": "Nombres con dígitos",
+        "Registros afectados": len(nombres_numericos),
+        "Acción tomada": "Documentado, revisión individual"
+    },
+    {
+        "Validación": "Nombres genéricos o de relleno",
+        "Registros afectados": len(nombres_genericos),
+        "Acción tomada": "Conservados, representan personas no identificadas"
+    },
+])
+
+resumen.style \
+    .set_properties(**{"font-size": "12px", "text-align": "left"}) \
+    .set_table_styles([
+        {"selector": "th", "props": [
+            ("background-color", "#4d2c18"), ("color", "white"),
+            ("font-weight", "bold"), ("font-size", "14px"),
+            ("text-align", "left"), ("padding", "10px")
+        ]},
+        {"selector": "td", "props": [
+            ("vertical-align", "top"),
+            ("padding", "8px 10px"),
+            ("border-bottom", "1px solid #dcb685")
+        ]},
+    ]) \
+    .hide(axis="index")
+```
+
+:::
+:::
 
 # Medidas, Visualización e Interpretación
 
@@ -880,9 +1007,9 @@ ax2.set_yticks(range(len(top10)))
 ax2.set_yticklabels(top10.index[::-1], fontsize=8)
 ax2.set_title("Top 10 Entidades (moda resaltada)")
 ax2.set_xlabel("Número de casos")
-for bar, val in zip(bars, top10.values[::-1]):
-    ax2.text(bar.get_width() + 30, bar.get_y() + bar.get_height()/2,
-             f"{val:,}", va="center", fontsize=7.5)
+for bar, val in zip(bars, top10.values):
+    _ = ax2.text(bar.get_width() + 30, bar.get_y() + bar.get_height()/2,
+                 f'{val:,}', va='center', fontsize=7.5)
 plt.tight_layout()
 plt.show()
 ```
@@ -930,7 +1057,7 @@ ax.set_ylabel("Año"); ax.set_xticks([])
 for label, val in [(f"Mediana {mediana:.0f}", mediana),
                    (f"Q1 {p25:.0f}", p25),
                    (f"Q3 {p75:.0f}", p75)]:
-    ax.annotate(label, xy=(1, val), xytext=(1.28, val), fontsize=8,
+    _ = ax.annotate(label, xy=(1, val), xytext=(1.28, val), fontsize=8,
                 color=COLORES["primario"], va="center",
                 arrowprops=dict(arrowstyle="-", color=COLORES["primario"]))
 
@@ -1009,7 +1136,7 @@ ax2.set_title(f"Distribución de Estatus de Búsqueda\n"
               f"H={H_est:.2f} bits | H_norm={H_norm_est:.3f} | D={D_est:.4f}")
 ax2.set_xlabel("Número de casos")
 for i, val in enumerate(frec_est.values):
-    ax2.text(val + 50, i, f"{val:,}", va="center", fontsize=7.5)
+    _ = ax2.text(val + 50, i, f"{val:,}", va="center", fontsize=7.5)
 plt.tight_layout()
 plt.show()
 ```
@@ -1018,7 +1145,7 @@ plt.show()
 
 La **entropía de Shannon normalizada** para `entidad_desap` es **`{python} f"{H_norm_ent:.3f}"`** (escala 0–1, donde 1 = distribución perfectamente uniforme). Esto indica que, aunque los `{python} n_cat_ent` estados están representados, la distribución **no es uniforme**: algunas entidades concentran significativamente más casos. El índice de Simpson de **`{python} f"{D_ent:.4f}"`** representa la probabilidad de que dos registros al azar provengan de entidades distintas.
 
-Para `estatus_busqueda`, la entropía normalizada de **`{python} f"{H_norm_est:.3f}"`** con `{python} n_cat_est` categorías refleja una distribución heterogénea. Un estatus dominante puede indicar reclasificación administrativa masiva, lo cual introduce un sesgo oficialista en el análisis.
+Para `estatus_busqueda`, la entropía normalizada de **`{python} f"{H_norm_est:.3f}"`** con `{python} n_cat_est` categorías refleja una distribución concentrada, donde pocas categorías acumulan la mayoría de los registros. Un estatus dominante puede indicar reclasificación administrativa masiva, lo cual introduce un sesgo oficialista en el análisis.
 
 ## Row {.tabset}
 
@@ -1193,3 +1320,7 @@ debiles_str = "; ".join(
 Las **correlaciones más fuertes** encontradas son: **`{python} fuertes_str`**. Estas asociaciones reflejan la coherencia entre los distintos sistemas de registro —un caso presente en el RNPED o en la Búsqueda Generalizada tiende a aparecer también en otras bases, lo cual es esperable dado el proceso de migración institucional.
 
 Las **correlaciones más débiles** corresponden a: **`{python} debiles_str`**. La baja correlación con `anio_desap` confirma que el año de la desaparición no determina directamente si un caso fue incorporado a los registros más recientes, sugiriendo que la inclusión depende más de factores administrativos o políticos que de la antigüedad del caso.
+
+# Hallazgos
+
+# Fuentes
