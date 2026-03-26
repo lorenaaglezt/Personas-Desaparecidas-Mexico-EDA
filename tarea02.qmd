@@ -674,7 +674,7 @@ df.drop(columns=['Unnamed: 0'], inplace=True)
 Para identificar duplicados en el dataset actual además de considerar la existencia de filas completamente idénticas, se identifican registros que con el mismo nombre pueden corresponder a personas distintas, y que eliminar un caso real por considerarlo duplicado tendría implicaciones éticas sensibles.
 :::
 ::: {.card}
-Como primera verificación buscamos filas completamente idénticas en todas las columnas. Un duplicado exacto indica que el mismo registro fue ingresado más de una ve al sistema sin ninguna variación, lo que representa un error de captura o de integración entre las distintas fuentes del dataset. Se eliminan aquellos duplicados sin pérdida de información cuando son totalmente idénticas.
+Buscamos filas completamente idénticas en todas las columnas. Un duplicado exacto indica que el mismo registro fue ingresado más de una ve al sistema sin ninguna variación, lo que representa un error de captura o de integración entre las distintas fuentes del dataset. Se eliminan aquellos duplicados sin pérdida de información cuando son totalmente idénticas.
 
 ```{python}
 #| echo: true
@@ -691,7 +691,9 @@ registros_finales = df.shape[0]
 ```
 
 Número de registros duplicados: **`{python} duplicados_totales`**
+
 Número de registros finales: **`{python} registros_finales`**
+
 Porcentaje de registros eliminados **`{python} porcentaje`%**
 
 ::: {.callout-warning}
@@ -699,6 +701,7 @@ En este dataset cada fila representa a una persona. Eliminar un registro sin cer
 :::
 :::
 :::
+
 
 ### Validaciones
 
@@ -821,6 +824,117 @@ resumen.style \
 :::
 :::
 
+## Resultados
+
+::: {.layout-nrow=2}
+::: {.card}
+<h2>Implementación Final</h2>
+A continuación se presentan todas las acciones realizadas para limpiar el dataset. En este código se considera el datset inicial "tot_reg_desap.csv" que hemos estado analizando hasta ahora. Como resultado del siguiente código se obteiene "dataset_limpio.csv", el cual aplica todas las especificaciones que se han mencionado en la documentación.
+
+```{python}
+#| eval: false
+#| echo: true
+#| title: "Procesamiento del dataset"
+
+import pandas as pd
+import numpy as np
+import seaborn as sns
+from sklearn.impute import KNNImputer
+from sklearn.preprocessing import OrdinalEncoder
+
+df = pd.read_csv("tot_reg_desap.csv") # dataset inicial
+
+
+# Verificación de tipo de dato booleano
+columnas_booleanas = ['rnpdno_json', 'pre_rnped', 'rnped', 'rnpdno_csv', 'bg_1', 'bg_2']
+for col in columnas_booleanas:
+    df[col] = df[col].astype(bool)
+
+# Verificación de texto normalizado
+columnas_texto = ['nombrecompleto', 'fub', 'DC_id']
+for col in columnas_texto:
+    df[col] = df[col].astype('string')
+    
+# Transformacion de fechas considerando múltiples fechas registradas
+df['fecha_desap'] = df['fecha_desap'].astype(str)
+df['fecha_desap'] = df['fecha_desap'].str.split(',').str[0].str.strip()
+df['fecha_desap'] = df['fecha_desap'].replace({
+    'NA': np.nan, 'nan': np.nan, '<NA>': np.nan, 'None': np.nan, '': np.nan
+})
+df['fecha_desap'] = pd.to_datetime(
+    df['fecha_desap'], format='mixed', dayfirst=True, errors='coerce'
+)
+
+
+# Normalización de categorías
+
+# Nombres: mayúsculas y sin espacios extra
+df['nombrecompleto'] = df['nombrecompleto'].str.upper().str.strip()
+df['nombrecompleto'] = df['nombrecompleto'].str.replace(r'\s+', ' ', regex=True)
+
+# Entidad: mayúsculas, sin acentos
+df['entidad_desap'] = df['entidad_desap'].str.upper().str.strip()
+df['entidad_desap'] = (
+    df['entidad_desap']
+    .str.normalize('NFKD')
+    .str.encode('ascii', errors='ignore')
+    .str.decode('utf-8')
+)
+
+# Estatus: primera letra mayúscula, resto minúscula, sin espacios
+df['estatus_busqueda'] = df['estatus_busqueda'].str.capitalize().str.strip()
+
+# Convertir a category después de normalizar
+df['entidad_desap'] = df['entidad_desap'].astype('category')
+df['estatus_busqueda'] = df['estatus_busqueda'].astype('category')
+
+
+# Proceso de datos faltantes
+
+# estatus_busqueda: KNN
+cols = ['entidad_desap', 'estatus_busqueda']
+df_knn = df[cols].copy()
+
+encoder = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=np.nan)
+df_encoded = encoder.fit_transform(df_knn)
+
+imputer = KNNImputer(n_neighbors=5)
+df_imputed = imputer.fit_transform(df_encoded)
+df_imputed = np.round(df_imputed)
+
+df_decoded = encoder.inverse_transform(df_imputed)
+df['estatus_busqueda'] = df_decoded[:, 1]
+df['estatus_busqueda'] = df['estatus_busqueda'].astype('category')
+
+
+# fecha_desap: imputación por moda de la entidad
+# La fecha imputada representa la moda del estado, no la fecha real
+moda_por_entidad = df.groupby('entidad_desap')['fecha_desap'].transform(
+    lambda x: x.mode()[0] if not x.mode().empty else pd.NaT
+)
+df['fecha_desap'] = df['fecha_desap'].fillna(moda_por_entidad)
+
+
+# Columna index innecesaria
+df.drop(columns=['Unnamed: 0'], inplace=True)
+
+
+# Duplicados
+df.drop_duplicates(inplace=True)
+
+
+# Ordenar y exportar el archivo
+
+df.sort_values(by='fecha_desap', ascending=False, inplace=True)
+df.to_csv('dataset_limpio.csv', index=False, encoding='utf-8')
+```
+
+:::
+::: {.card}
+Para acceder al dataset después de aplicar los procedimientos anteriores: [dataset_limpio.csv](https://drive.google.com/file/d/16GlQ8A-6V7JGuKV2BkTT96iQX4OFHMxr/view?usp=sharing)
+:::
+:::
+
 # Medidas, Visualización e Interpretación
 
 ```{python}
@@ -935,9 +1049,20 @@ pct_top20    = frec_sorted.head(n_top20).sum() / frec_sorted.sum() * 100
 top3_estados = ", ".join(frec_sorted.head(3).index.tolist())
 ```
 
+## Introducción
+
+::: {.card}
+Después de realizar la limpieza y transformación de los datos, podemos proceder al cálculo de las Medidas de Descriptivas que nos ayuden a entender que información contiene los datos para así poder dar una interpretación sustentada en datos verídicos y cumplir con los objetivos antes planteados.
+
+Es importante mencionar que para realizar medidas con mayor enfoque a nuestras preguntas de análisis, se creo una variable llamada anio_desap, la cual fue obtenida a partir de la variable fecha_desap y contiene únicamente el año de desaparición. Para nuestros fines resulta conveniente esta creación de variable.
+:::
+
 ## Row {.tabset}
 
 ### 📍 Localización — Tabla
+
+::: {.card}
+Obtener estas medidas no es solo hacer un cálculo matemático, sino encontrar el epicentro temporal, geográfico y de estatus de registros de la crisis. Se realizan cálculos de media, moda, mediana y los percentiles de la información.
 
 ```{python}
 #| echo: false
@@ -953,6 +1078,8 @@ tabla_loc = pd.DataFrame([
 ])
 display(estilo_tabla(tabla_loc))
 ```
+
+:::
 
 ### 📍 Localización — Gráfica
 
