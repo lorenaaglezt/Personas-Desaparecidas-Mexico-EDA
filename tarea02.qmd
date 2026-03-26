@@ -1012,15 +1012,23 @@ for bar, val in zip(bars, top10.values):
                  f'{val:,}', va='center', fontsize=7.5)
 plt.tight_layout()
 plt.show()
+plt.close()
 ```
 
 ### 📍 Localización — Interpretación
 
-La distribución temporal de los registros muestra una **asimetría positiva**: la media (**`{python} f"{media:.0f}"`**) se ubica por encima de la mediana (**`{python} f"{mediana:.0f}"`**), lo que indica que casos con fechas muy recientes jalan la media hacia adelante. La moda (**`{python} f"{moda_val:.0f}"`**) es el año con mayor volumen de registros, coincidiendo con el periodo de consolidación del RNPDNO.
+El análisis de las medidas de tendencia central y posición revela una dinámica de crecimiento acelerado y una fuerte concentración institucional en el registro:
 
-El percentil 90 (**`{python} f"{p90:.0f}"`**) indica que nueve de cada diez registros corresponden a desapariciones ocurridas antes de ese año. La entidad federativa más frecuente es **`{python} moda_entidad`**, lo que refleja la concentración geográfica del fenómeno, tema que se profundiza en las medidas de concentración.
+* **Análisis de Asimetría y Tendencia Temporal:** La distribución presenta una **asimetría negativa** (hacia la izquierda), ya que la media (**`{python} f"{media:.1f}"`**) se ubica por debajo de la mediana (**`{python} f"{mediana:.0f}"`**). Esto indica que, aunque existen registros históricos aislados desde 1964 que "jalan" el promedio hacia atrás, la gran masa de datos se desplaza violentamente hacia la actualidad. La moda (**`{python} f"{moda_val:.0f}"`**) marca el punto máximo de registros, coincidiendo con el periodo de consolidación operativa del RNPDNO tras la Ley General de 2017.
+
+* **Concentración en el Rango Intercuartílico (IQR):** Es notable que el **50% central de los casos** (entre el primer y tercer cuartil) se concentra en un periodo de apenas 6 años, entre **`{python} f"{p25:.0f}"`** y **`{python} f"{p75:.0f}"`**. Esto demuestra una intensificación drástica en la generación de folios en la última década o una mayor eficacia en la sistematización de datos recientes.
+
+* **Percentil 90 y Casos Críticos:** El percentil 90 (**`{python} f"{p90:.0f}"`**) indica que nueve de cada diez registros corresponden a desapariciones ocurridas antes de ese año; sin embargo, esto también implica que el **10% de todo el dataset** (miles de casos) se ha registrado apenas entre 2022 y 2023.
+
+* **Predominancia Geográfica y de Estatus:** La entidad federativa más frecuente es **`{python} moda_entidad`**, lo que refleja el foco crítico de este fenómeno en la frontera norte. Por otro lado, la moda en el estatus de búsqueda (**`{python} moda_estatus`**) revela que una gran parte del sistema depende administrativamente de la obtención de nuevos indicios o de la participación de los reportantes para procesar los expedientes.
 
 ## Row {.tabset}
+
 
 ### 📊 Variabilidad — Tabla
 
@@ -1076,13 +1084,22 @@ ax2.set_title("Variabilidad Temporal por Entidad (Top 6)")
 ax2.set_ylabel("Año de Desaparición")
 plt.tight_layout()
 plt.show()
+plt.close()
 ```
 
 ### 📊 Variabilidad — Interpretación
 
-La desviación estándar de **`{python} f"{std:.1f}"`** años indica una dispersión considerable alrededor de la media temporal, abarcando desde los primeros casos históricos hasta el presente. El rango total de **`{python} f"{rango:.0f}"`** años confirma que el dataset integra varias décadas de registros.
+El análisis de la dispersión temporal permite identificar cómo se distribuye la crisis de desapariciones a través de las décadas, revelando una estructura de datos altamente concentrada pero con una memoria histórica extensa:
 
-El rango intercuartílico de **`{python} f"{iqr:.0f}"`** años es especialmente informativo: el 50% central de los casos se concentra en una ventana temporal relativamente reciente. El coeficiente de variación de **`{python} f"{cv:.1f}"`%** refleja la dispersión relativa, atribuible en parte a la transición entre el RNPED y el RNPDNO. El boxplot por entidad muestra que algunas tienen mayor dispersión temporal —casos que abarcan décadas— mientras otras concentran sus registros en años recientes.
+* **Dispersión vs. Memoria Histórica:** La desviación estándar de **`{python} f"{std:.1f}"`** años indica una dispersión considerable respecto a la media. Sin embargo, el **rango total de `{python} f"{rango:.0f}"` años** (1964–2023) es lo que verdaderamente dimensiona la cronicidad del problema, integrando registros que datan desde la época de la llamada "Guerra Sucia" hasta la actualidad.
+
+* **El Fenómeno de la "Caja Estrecha" (IQR):** El dato más revelador es el **Rango Intercuartílico (IQR) de solo `{python} f"{iqr:.0f}"` años**. Esto significa que, a pesar de que el dataset abarca casi seis décadas, el **50% de todos los casos registrados** se asfixia en una ventana temporal sumamente breve (2013–2019). Esta concentración masiva sugiere una "aceleración" del fenómeno o un sesgo de captura institucional en años recientes.
+
+* **Análisis de Valores Atípicos (Outliers):** En el Boxplot general, se observa una densa estela de valores atípicos que se extiende hacia el pasado (antes de 2005). Estos puntos representan la resistencia de los registros históricos que, aunque numéricamente son menos que los actuales, mantienen viva la trazabilidad de desapariciones de décadas anteriores en el sistema nacional.
+
+* **Variabilidad por Entidad (Top 6):** Al comparar los estados con mayor incidencia, se nota que **Tamaulipas y el Estado de México** presentan "bigotes" más largos y una mayor cantidad de valores atípicos hacia años antiguos, lo que refleja una problemática de mayor data. Por el contrario, entidades como **Jalisco o Michoacán** muestran cajas (IQR) posicionadas de forma más compacta en el extremo superior del gráfico, sugiriendo que el volumen masivo de sus registros es un fenómeno predominantemente más reciente o de reporte tardío.
+
+* **Coeficiente de Variación (CV):** El valor de **`{python} f"{cv:.1f}"`%** refleja una dispersión relativa baja respecto a la magnitud de los años, lo cual es típico en variables temporales de este tipo, pero confirma que la transición entre el RNPED y el RNPDNO no rompió la continuidad estadística de la tendencia central.
 
 ## Row {.tabset}
 
@@ -1139,13 +1156,22 @@ for i, val in enumerate(frec_est.values):
     _ = ax2.text(val + 50, i, f"{val:,}", va="center", fontsize=7.5)
 plt.tight_layout()
 plt.show()
+plt.close()
 ```
 
 ### 🔀 Heterogeneidad — Interpretación
 
-La **entropía de Shannon normalizada** para `entidad_desap` es **`{python} f"{H_norm_ent:.3f}"`** (escala 0–1, donde 1 = distribución perfectamente uniforme). Esto indica que, aunque los `{python} n_cat_ent` estados están representados, la distribución **no es uniforme**: algunas entidades concentran significativamente más casos. El índice de Simpson de **`{python} f"{D_ent:.4f}"`** representa la probabilidad de que dos registros al azar provengan de entidades distintas.
+El análisis de diversidad y entropía permite cuantificar qué tan equilibrada está la información o si existen sesgos de concentración que dominen el dataset:
 
-Para `estatus_busqueda`, la entropía normalizada de **`{python} f"{H_norm_est:.3f}"`** con `{python} n_cat_est` categorías refleja una distribución concentrada, donde pocas categorías acumulan la mayoría de los registros. Un estatus dominante puede indicar reclasificación administrativa masiva, lo cual introduce un sesgo oficialista en el análisis.
+* **Diversidad Geográfica (Entidad Federativa):**
+    * **Índice de Simpson (D = `{python} f"{D_ent:.4f}"`):** Este valor es notablemente alto (0.9366). Significa que existe una probabilidad del **93.6%** de que, si seleccionamos dos registros al azar, estos pertenezcan a estados diferentes. Esto confirma que la desaparición es un fenómeno de alcance nacional y no está confinado a una sola región.
+    * **Entropía Normalizada (H_norm = `{python} f"{H_norm_ent:.3f}"`):** Aunque la diversidad es alta, el hecho de que no sea 1.0 indica que la "incertidumbre" no es máxima. Como se observa en la gráfica de barras, estados como **Tamaulipas y el Estado de México** actúan como "atractores" masivos de registros, impidiendo que la distribución sea perfectamente uniforme a través de las `{python} n_cat_ent` entidades.
+
+* **Concentración en el Estatus de Búsqueda:**
+    * **Entropía Normalizada (H_norm = `{python} f"{H_norm_est:.3f}"`):** Este valor es significativamente menor al geográfico (0.604), alejándose un **40% de la uniformidad teórica**. Con solo `{python} n_cat_est` categorías, el sistema tiende a "encasillar" la mayoría de los casos en etiquetas específicas.
+    * **Dominancia Administrativa:** La categoría **"Se busca reportante"** domina visualmente la gráfica, lo cual explica el Índice de Simpson más bajo (**`{python} f"{D_est:.4f}"`**). Esta alta concentración sugiere un proceso de **reclasificación masiva**; es decir, la autoridad utiliza categorías administrativas genéricas para gestionar grandes volúmenes de datos, lo que introduce un sesgo oficialista que podría simplificar la complejidad real de los procesos de localización.
+
+* **Incertidumbre Informativa:** La combinación de una alta diversidad geográfica con una baja diversidad de estatus revela una paradoja técnica: mientras que el origen de los casos es heterogéneo (ocurre en todo el país), el resultado administrativo es homogéneo (se clasifican bajo los mismos pocos términos), lo que apunta a una **estandarización burocrática** del fenómeno.
 
 ## Row {.tabset}
 
@@ -1190,13 +1216,23 @@ plot_lorenz(axes[1], lx_a, ly_a, gini_anio,
             "Concentración por Año de Desaparición", COLORES["acento"])
 plt.tight_layout()
 plt.show()
+plt.close()
 ```
 
 ### 📐 Concentración — Interpretación
 
-El **índice de Gini** para la distribución por entidad es **`{python} f"{gini_ent:.4f}"`**. Un valor de 0 indica distribución igualitaria; un valor de 1 indica concentración absoluta. El valor obtenido sugiere **concentración moderada-alta**: el 20% de entidades más afectadas (`{python} n_top20` estados — **`{python} top3_estados`** y otros) concentran el **`{python} f"{pct_top20:.1f}"`%** del total de casos, consistente con las regiones históricamente más afectadas por la violencia organizada.
+El análisis de concentración mediante el Índice de Gini y las Curvas de Lorenz permite identificar desequilibrios críticos en cómo se registran los casos en el territorio y a través del tiempo:
 
-La curva de Lorenz temporal (Gini = **`{python} f"{gini_anio:.4f}"`**) muestra concentración en años recientes. Esta asimetría no refleja necesariamente un aumento real proporcional del fenómeno, sino posiblemente la mejora en sistemas de registro derivada de la Ley General de Desapariciones de 2017.
+* **Concentración Geográfica (Desigualdad Territorial):**
+    * **Índice de Gini (`{python} f"{gini_ent:.4f}"`):** Un valor de **0.5253** confirma una **concentración moderada-alta**. En el gráfico, la curva marrón se aleja significativamente de la diagonal de igualdad perfecta, lo que indica que el fenómeno no está distribuido de manera equitativa ni uniforme.
+    * **Regla del 20/50:** El hallazgo más impactante es que el **20% de las entidades más afectadas** (apenas 7 estados como **Tamaulipas, Estado de México y Veracruz**) concentran el **54.4% del total de casos**. Esto sugiere que más de la mitad de la crisis nacional se localiza en focos rojos específicos vinculados históricamente a rutas de violencia organizada y disputas territoriales.
+
+* **Concentración Temporal (El "Salto" Institucional):**
+    * **Índice de Gini (`{python} f"{gini_anio:.4f}"`):** Este valor de **0.7569** es extremadamente alto, acercándose a la concentración total. La Curva de Lorenz turquesa permanece casi plana durante el 70% de las categorías anuales, para luego dispararse de forma casi vertical al final.
+    * **Efecto de Visibilidad Administrativa:** Esta forma de "L" invertida refleja que la gran mayoría de los registros del dataset pertenecen a una ventana de tiempo muy pequeña. Más que un aumento repentino en el número real de delitos, este comportamiento evidencia el impacto de la **Ley General de 2017**, que obligó a una centralización masiva de datos antes dispersos o inexistentes en el sistema oficial.
+
+* **Comparativa Técnica:** Mientras que la concentración geográfica (Gini 0.52) refleja un problema de seguridad regional, la concentración temporal (Gini 0.75) es un reflejo de la **evolución de los sistemas de información del Estado**. La "desigualdad" en los años se debe a que hoy el Estado tiene herramientas de registro que en 1970 no existían, invisibilizando estadísticamente el pasado frente a un presente densamente documentado.
+
 
 # Correlación
 
@@ -1296,6 +1332,7 @@ ax.set_yticklabels(ax.get_yticklabels(), rotation=0, fontsize=9)
 
 plt.tight_layout()
 plt.show()
+plt.close()
 ```
 
 ### 📝 Interpretación
@@ -1317,10 +1354,63 @@ debiles_str = "; ".join(
 )
 ```
 
-Las **correlaciones más fuertes** encontradas son: **`{python} fuertes_str`**. Estas asociaciones reflejan la coherencia entre los distintos sistemas de registro —un caso presente en el RNPED o en la Búsqueda Generalizada tiende a aparecer también en otras bases, lo cual es esperable dado el proceso de migración institucional.
 
-Las **correlaciones más débiles** corresponden a: **`{python} debiles_str`**. La baja correlación con `anio_desap` confirma que el año de la desaparición no determina directamente si un caso fue incorporado a los registros más recientes, sugiriendo que la inclusión depende más de factores administrativos o políticos que de la antigüedad del caso.
+Las **correlaciones más fuertes** encontradas son: **`{python} fuertes_str`**. 
+
+Estas asociaciones reflejan una alta coherencia interna en las etapas de la Búsqueda Generalizada, pero también revelan una **brecha técnica**: la correlación de **0.73** entre el JSON y el CSV del RNPDNO confirma que los ciudadanos acceden a información distinta dependiendo del formato que consulten.
+
+Por otro lado, las **correlaciones negativas** con los registros históricos (`pre_rnped` y `rnped`) sugieren que una parte considerable de la memoria histórica del RNPED no logró transitar exitosamente hacia las nuevas plataformas digitales.
+
+Finalmente, las **correlaciones más débiles** corresponden a: **`{python} debiles_str`**. La nula asociación con `anio_desap` es un hallazgo fundamental: demuestra que la visibilidad de una persona desaparecida en los registros oficiales es un proceso **discrecional y administrativo**, totalmente independiente de qué tan antiguo o reciente sea el caso.
+
+
 
 # Hallazgos
 
+## Row 
+
+::: {.card}
+
+### Hallazgo 1 — Concentración geográfica en pocas entidades
+
+### Hallazgo 2 — Crecimiento sostenido de registros a partir del 2007
+
+### Hallazgo 3 — Estatus de búsqueda: "Se busca reportante"
+
+### Hallazgo 4 — Variabilidad heterogénea entre las entidades
+
+### Hallazgo 5 — Búsqueda Generalizada relacionada con RNPED y RNPDNO
+
+### Hallazgo 6 — Registros históricos que desaparecieron del sistema oficial
+
+### Hallazgo 7 — La desaparición es un fenómeno nacional, pero con epicentros muy marcados
+
+### Hallazgo 8 — La mayoría de los casos con progreso real son una minoría dentro del sistema
+
+:::
+
+
+
 # Fuentes
+
+## Row
+
+::: {.card}
+
+Comisión Nacional de Búsqueda. (s. f.). *Tipos de búsqueda*. Secretaría de Gobernación. Recuperado el 23 de marzo de 2026, de <https://comisionacionaldebusqueda.segob.gob.mx/tipos-de-busqueda/>
+
+Comisión Nacional de Búsqueda. (s. f.). *Consulta pública. Registro Nacional de Personas Desaparecidas y No Localizadas*. Recuperado el 23 de marzo de 2026, de <https://consultapublicarnpdno.segob.gob.mx/>
+
+Gerardo Pérez, S. O. (2023, 9 de noviembre). *El Registro Nacional de Personas Desaparecidas y No Localizadas… una posibilidad para visibilizar la desaparición*. A dónde van los desaparecidos. Recuperado el 24 de marzo de 2026, de <https://adondevanlosdesaparecidos.org/2023/11/09/el-registro-nacional-de-personas-desaparecidas-y-no-localizadas-una-posibilidad-para-visibilizar-la-desaparicion/>
+
+Comisión Nacional de Búsqueda. (s. f.). *Versión estadística RNPDNO* [Dashboard]. Secretaría de Gobernación. Recuperado el 24 de marzo de 2026, de <https://versionpublicarnpdno.segob.gob.mx/Dashboard/Index>
+
+Data Cívica. (2025, 2 de septiembre). *A quienes nos faltan: Datos para encontrarles 2025*. Observatorio sobre Desaparición e Impunidad en México. Recuperado el 24 de marzo de 2026, de <https://odim.juridicas.unam.mx/detalle/1829/A%20quienes%20nos%20faltan%3A%20Datos%20para%20encontrarles%202025>
+
+Red Lupa. (2025, 16 de mayo). *Informe nacional de personas desaparecidas 2025*. Instituto Mexicano de Derechos Humanos y Democracia. Recuperado el 25 de marzo de 2026, de <https://imdhd.org/redlupa/informes-y-analisis/informes-nacionales/informe-nacional-de-personas-desaparecidas-2025/>
+
+López Cruz, H. M., & Romero Vargas, A. V. (2024, 14 de septiembre). *Las políticas públicas en los casos de personas desaparecidas en México*. Universidad La Salle; Observatorio sobre Desaparición e Impunidad en México. Recuperado el 25 de marzo de 2026, de <https://odim.juridicas.unam.mx/detalle/1835/Las%20pol%C3%ADticas%20p%C3%BAblicas%20en%20los%20casos%20de%20personas%20desaparecidas%20en%20M%C3%A9xico>
+
+Flores, S., & Nochebuena, M. (2026, 4 de marzo). *Sin acceso a las prendas: Ignoran autoridades peticiones de familiares*. A dónde van los desaparecidos. Recuperado el 26 de marzo de 2026, de <https://adondevanlosdesaparecidos.org/2026/03/04/sin-acceso-a-las-prendas-ignoran-autoridades-peticiones-de-familiares/>
+
+:::
