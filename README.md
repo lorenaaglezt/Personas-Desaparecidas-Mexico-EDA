@@ -80,10 +80,6 @@ python -m ipykernel install --user --name=tarea02 --display-name "Tarea 02 - AMD
 ```
 
 
-```powershell
-.\setup.ps1
-```
-
 ### Linux/Mac
 Crea el entorno virtual en la raíz del proyecto:
 ```bash
@@ -104,11 +100,6 @@ pip install -r requirements.txt
 Registra el kernel para Quarto:
 ```bash
 python -m ipykernel install --user --name=tarea02 --display-name "Tarea 02 - AMD"
-```
-
-
-```bash
-bash setup.sh
 ```
 
 ---
