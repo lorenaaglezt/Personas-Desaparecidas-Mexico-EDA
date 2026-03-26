@@ -1061,9 +1061,6 @@ Es importante mencionar que para realizar medidas con mayor enfoque a nuestras p
 
 ### 📍 Localización — Tabla
 
-::: {.card}
-Obtener estas medidas no es solo hacer un cálculo matemático, sino encontrar el epicentro temporal, geográfico y de estatus de registros de la crisis. Se realizan cálculos de media, moda, mediana y los percentiles de la información.
-
 ```{python}
 #| echo: false
 tabla_loc = pd.DataFrame([
@@ -1079,27 +1076,26 @@ tabla_loc = pd.DataFrame([
 display(estilo_tabla(tabla_loc))
 ```
 
-:::
-
 ### 📍 Localización — Gráfica
 
 ```{python}
 #| echo: false
 fig, axes = plt.subplots(1, 2, figsize=(13, 4))
-fig.suptitle("Medidas de Localización", fontsize=14,
+_ = fig.suptitle("Medidas de Localización", fontsize=14,
              fontweight="bold", color=COLORES["primario"])
 
 ax = axes[0]
-ax.hist(anios, bins=40, color=COLORES["claro"],
+_ = ax.hist(anios, bins=40, color=COLORES["claro"],
         edgecolor=COLORES["primario"], linewidth=0.5)
-ax.axvline(media,    color=COLORES["primario"],   lw=2, ls="-",  label=f"Media   {media:.0f}")
-ax.axvline(mediana,  color=COLORES["acento"],     lw=2, ls="--", label=f"Mediana {mediana:.0f}")
-ax.axvline(moda_val, color=COLORES["secundario"], lw=2, ls=":",  label=f"Moda    {moda_val:.0f}")
-ax.axvspan(p25, p75, alpha=0.12, color=COLORES["acento"],
+_ = ax.axvline(media,    color=COLORES["primario"],   lw=2, ls="-",  label=f"Media   {media:.0f}")
+_ = ax.axvline(mediana,  color=COLORES["acento"],     lw=2, ls="--", label=f"Mediana {mediana:.0f}")
+_ = ax.axvline(moda_val, color=COLORES["secundario"], lw=2, ls=":",  label=f"Moda    {moda_val:.0f}")
+_ = ax.axvspan(p25, p75, alpha=0.12, color=COLORES["acento"],
            label=f"IQR ({p25:.0f}–{p75:.0f})")
-ax.set_title("Distribución del Año de Desaparición")
-ax.set_xlabel("Año"); ax.set_ylabel("Número de casos")
-ax.legend(fontsize=8)
+_ = ax.set_title("Distribución del Año de Desaparición")
+_ = ax.set_xlabel("Año")
+_ = ax.set_ylabel("Número de casos")
+_ = ax.legend(fontsize=8)
 
 ax2 = axes[1]
 top10 = df["entidad_desap"].value_counts().head(10)
@@ -1107,13 +1103,14 @@ bar_colors = [COLORES["primario"] if e == moda_entidad else COLORES["claro"]
               for e in top10.index[::-1]]
 bars = ax2.barh(range(len(top10)), top10.values[::-1],
                 color=bar_colors, edgecolor="white", linewidth=0.3)
-ax2.set_yticks(range(len(top10)))
-ax2.set_yticklabels(top10.index[::-1], fontsize=8)
-ax2.set_title("Top 10 Entidades (moda resaltada)")
-ax2.set_xlabel("Número de casos")
+_ = ax2.set_yticks(range(len(top10)))
+_ = ax2.set_yticklabels(top10.index[::-1], fontsize=8)
+_ = ax2.set_title("Top 10 Entidades (moda resaltada)")
+_ = ax2.set_xlabel("Número de casos")
 for bar, val in zip(bars, top10.values):
     _ = ax2.text(bar.get_width() + 30, bar.get_y() + bar.get_height()/2,
                  f'{val:,}', va='center', fontsize=7.5)
+
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -1153,19 +1150,20 @@ display(estilo_tabla(tabla_var))
 ```{python}
 #| echo: false
 fig, axes = plt.subplots(1, 2, figsize=(13, 4))
-fig.suptitle("Medidas de Variabilidad", fontsize=14,
+_ = fig.suptitle("Medidas de Variabilidad", fontsize=14,
              fontweight="bold", color=COLORES["primario"])
 
 ax = axes[0]
-ax.boxplot(anios.dropna(), vert=True, patch_artist=True,
+_ = ax.boxplot(anios.dropna(), vert=True, patch_artist=True,
            medianprops=dict(color=COLORES["primario"], lw=2.5),
            boxprops=dict(facecolor=COLORES["claro"], color=COLORES["primario"]),
            whiskerprops=dict(color=COLORES["texto"], lw=1.2),
            capprops=dict(color=COLORES["texto"], lw=1.2),
            flierprops=dict(marker="o", color=COLORES["acento"],
                            alpha=0.25, markersize=3))
-ax.set_title("Boxplot — Año de Desaparición")
-ax.set_ylabel("Año"); ax.set_xticks([])
+_ = ax.set_title("Boxplot — Año de Desaparición")
+_ = ax.set_ylabel("Año")
+_ = ax.set_xticks([])
 for label, val in [(f"Mediana {mediana:.0f}", mediana),
                    (f"Q1 {p25:.0f}", p25),
                    (f"Q3 {p75:.0f}", p75)]:
@@ -1183,9 +1181,10 @@ pal = [COLORES["claro"], COLORES["acento"], COLORES["secundario"],
        "#e8b4a0", "#a0c4e8", "#c4a0e8"]
 for patch, col in zip(bp2["boxes"], pal):
     patch.set_facecolor(col)
-ax2.set_xticklabels([e[:14] for e in top6], rotation=25, ha="right", fontsize=8)
-ax2.set_title("Variabilidad Temporal por Entidad (Top 6)")
-ax2.set_ylabel("Año de Desaparición")
+_ = ax2.set_xticklabels([e[:14] for e in top6], rotation=25, ha="right", fontsize=8)
+_ = ax2.set_title("Variabilidad Temporal por Entidad (Top 6)")
+_ = ax2.set_ylabel("Año de Desaparición")
+
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -1231,33 +1230,34 @@ display(estilo_tabla(tabla_het))
 ```{python}
 #| echo: false
 fig, axes = plt.subplots(1, 2, figsize=(13, 4))
-fig.suptitle("Medidas de Heterogeneidad — Entropía de Shannon e Índice de Simpson",
+_ = fig.suptitle("Medidas de Heterogeneidad — Entropía de Shannon e Índice de Simpson",
              fontsize=13, fontweight="bold", color=COLORES["primario"])
 
 ax = axes[0]
 frec_ent   = df["entidad_desap"].value_counts()
 bar_colors = [COLORES["primario"]] + [COLORES["claro"]] * (len(frec_ent) - 1)
-ax.bar(range(len(frec_ent)), frec_ent.values,
+_ = ax.bar(range(len(frec_ent)), frec_ent.values,
        color=bar_colors, edgecolor="white", linewidth=0.3)
-ax.set_xticks(range(len(frec_ent)))
-ax.set_xticklabels(frec_ent.index, rotation=75, ha="right", fontsize=6.5)
-ax.set_title(f"Distribución por Entidad Federativa\n"
+_ = ax.set_xticks(range(len(frec_ent)))
+_ = ax.set_xticklabels(frec_ent.index, rotation=75, ha="right", fontsize=6.5)
+_ = ax.set_title(f"Distribución por Entidad Federativa\n"
              f"H={H_ent:.2f} bits | H_norm={H_norm_ent:.3f} | D={D_ent:.4f}")
-ax.set_ylabel("Número de casos")
+_ = ax.set_ylabel("Número de casos")
 
 ax2 = axes[1]
 frec_est    = df["estatus_busqueda"].value_counts()
 bar_colors2 = [COLORES["acento"]] + [COLORES["claro"]] * (len(frec_est) - 1)
-ax2.barh(range(len(frec_est)), frec_est.values,
+_ = ax2.barh(range(len(frec_est)), frec_est.values,
          color=bar_colors2, edgecolor="white", linewidth=0.3)
-ax2.set_yticks(range(len(frec_est)))
-ax2.set_yticklabels(frec_est.index, fontsize=8)
-ax2.invert_yaxis()
-ax2.set_title(f"Distribución de Estatus de Búsqueda\n"
+_ = ax2.set_yticks(range(len(frec_est)))
+_ = ax2.set_yticklabels(frec_est.index, fontsize=8)
+_ = ax2.invert_yaxis()
+_ = ax2.set_title(f"Distribución de Estatus de Búsqueda\n"
               f"H={H_est:.2f} bits | H_norm={H_norm_est:.3f} | D={D_est:.4f}")
-ax2.set_xlabel("Número de casos")
+_ = ax2.set_xlabel("Número de casos")
 for i, val in enumerate(frec_est.values):
     _ = ax2.text(val + 50, i, f"{val:,}", va="center", fontsize=7.5)
+
 plt.tight_layout()
 plt.show()
 plt.close()
@@ -1299,19 +1299,19 @@ display(estilo_tabla(tabla_conc))
 ```{python}
 #| echo: false
 fig, axes = plt.subplots(1, 2, figsize=(13, 5))
-fig.suptitle("Medidas de Concentración — Curvas de Lorenz e Índice de Gini",
+_ = fig.suptitle("Medidas de Concentración — Curvas de Lorenz e Índice de Gini",
              fontsize=13, fontweight="bold", color=COLORES["primario"])
 
 def plot_lorenz(ax, lx, ly, gini, titulo, color_curva):
-    ax.plot([0, 1], [0, 1], color="#999999", lw=1.2, ls="--", label="Igualdad perfecta")
-    ax.fill_between(lx, lx, ly, alpha=0.20, color=color_curva)
-    ax.plot(lx, ly, color=color_curva, lw=2.5, label=f"Curva de Lorenz\nGini = {gini:.4f}")
-    ax.set_xlim(0, 1); ax.set_ylim(0, 1)
-    ax.set_xlabel("Proporción acumulada de categorías")
-    ax.set_ylabel("Proporción acumulada de casos")
-    ax.set_title(titulo)
-    ax.legend(fontsize=9, loc="upper left")
-    ax.text(0.55, 0.08, f"Gini = {gini:.4f}", transform=ax.transAxes,
+    _ = ax.plot([0, 1], [0, 1], color="#999999", lw=1.2, ls="--", label="Igualdad perfecta")
+    _ = ax.fill_between(lx, lx, ly, alpha=0.20, color=color_curva)
+    _ = ax.plot(lx, ly, color=color_curva, lw=2.5, label=f"Curva de Lorenz\nGini = {gini:.4f}")
+    _ = ax.set_xlim(0, 1); ax.set_ylim(0, 1)
+    _ = ax.set_xlabel("Proporción acumulada de categorías")
+    _ = ax.set_ylabel("Proporción acumulada de casos")
+    _ = ax.set_title(titulo)
+    _ = ax.legend(fontsize=9, loc="upper left")
+    _ = ax.text(0.55, 0.08, f"Gini = {gini:.4f}", transform=ax.transAxes,
             fontsize=13, fontweight="bold", color=color_curva)
 
 plot_lorenz(axes[0], lx_e, ly_e, gini_ent,
@@ -1407,7 +1407,7 @@ display(estilo_tabla_corr(tabla_corr))
 
 fig, ax = plt.subplots(figsize=(8, 6))
 fig.patch.set_facecolor(COLORES["fondo"])
-ax.set_facecolor(COLORES["fondo"])
+_ = ax.set_facecolor(COLORES["fondo"])
 
 sns.heatmap(
     matriz,
@@ -1424,15 +1424,15 @@ sns.heatmap(
     cbar_kws={"shrink": 0.8}
 )
 
-ax.set_title(
+_ = ax.set_title(
     "Matriz de Correlación — Variables de Registro",
     fontsize=13,
     fontweight="bold",
     color=COLORES["primario"],
     pad=15
 )
-ax.set_xticklabels(ax.get_xticklabels(), rotation=35, ha="right", fontsize=9)
-ax.set_yticklabels(ax.get_yticklabels(), rotation=0, fontsize=9)
+_ = ax.set_xticklabels(ax.get_xticklabels(), rotation=35, ha="right", fontsize=9)
+_ = ax.set_yticklabels(ax.get_yticklabels(), rotation=0, fontsize=9)
 
 plt.tight_layout()
 plt.show()
