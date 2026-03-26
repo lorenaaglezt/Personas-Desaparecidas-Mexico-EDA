@@ -659,63 +659,40 @@ missing.style \
 ### Duplicados
 
 ::: {.layout-nrow=4}
+
+::: {.card}
+Antes de iniciar con la revisión de los duplicados, en el dataset contamos con una columna llamada Unnamed:0, la cual simplemente es un conteo de filas y no es necesario para el análisis, por ello, eliminamos la columna que no nos aporta información.
+
+```{python}
+#| echo: true
+#| title: "Eliminación de columna Unnamed:0"
+df.drop(columns=['Unnamed: 0'], inplace=True)
+```
+
+:::
 ::: {.card}
 Para identificar duplicados en el dataset actual además de considerar la existencia de filas completamente idénticas, se identifican registros que con el mismo nombre pueden corresponder a personas distintas, y que eliminar un caso real por considerarlo duplicado tendría implicaciones éticas sensibles.
 :::
 ::: {.card}
-Como primera verificación buscamos filas completamente idénticas en todas las columnas. Un duplicado exacto indica que el mismo registro fue ingresado más de una ve al sistema sin ninguna variación, lo que representa un error de captura o de integración entre las distintas fuentes del dataset. Si incluyendo fub, fecha_desap y estatus_busqueda son idénticas, se considera que es un registro repetido y se elimina la copia sin pérdida de información.
+Como primera verificación buscamos filas completamente idénticas en todas las columnas. Un duplicado exacto indica que el mismo registro fue ingresado más de una ve al sistema sin ninguna variación, lo que representa un error de captura o de integración entre las distintas fuentes del dataset. Se eliminan aquellos duplicados sin pérdida de información cuando son totalmente idénticas.
 
 ```{python}
 #| echo: true
 #| title: "Detección de duplicados exactos"
-print("Duplicados totales:", df.duplicated().sum())
+
+# Cantidades de los duplicados
+registros_inicial = len(df)
+duplicados_totales = int(df.duplicated().sum())
+porcentaje = round(duplicados_totales / registros_inicial * 100, 2)
+
+# Eliminación de duplicados
 df.drop_duplicates(inplace=True)
-print("Filas después de eliminar duplicados:", df.shape)
+registros_finales = df.shape[0]
 ```
 
-:::
-::: {.card}
-Por otro lado, se evalúa si existen registros con el mismo nombre y la misma fecha de desaparición que podrían representar a la misma persona registrada dos veces con ligeras diferencias en otros campos. Este caso es más delicado porque la coincidencia de nombre y fecha no garantiza que sea la misma persona.
-El criterio de diferenciación es el fub: si dos registros comparten nombre y fecha pero tienen folios distintos, se consideran personas diferentes y ambos se conservan. Si comparten nombre, fecha y fub, se trata del mismo caso y se elimina la copia.
-
-```{python}
-#| echo: true
-#| title: "Detección de duplicados semánticos"
-duplicados_semanticos = df.duplicated(
-    subset=["nombrecompleto", "fecha_desap", "fub"], keep=False
-)
-total = len(df)
-n_duplicados = int(duplicados_semanticos.sum())
-porcentaje = round(n_duplicados / total * 100, 2)
-
-print(f"Posibles duplicados semánticos : {n_duplicados}")
-print(f"Total de registros             : {total:,}")
-print(f"Porcentaje sobre el total      : {porcentaje}%")
-
-if n_duplicados > 0:
-    df[duplicados_semanticos][["nombrecompleto", "fecha_desap", "fub"]] \
-        .reset_index(drop=True) \
-        .head(10) \
-        .style \
-        .set_properties(**{"font-size": "12px", "text-align": "left"}) \
-        .set_table_styles([
-            {"selector": "th", "props": [
-                ("background-color", "#4d2c18"), ("color", "white"),
-                ("font-weight", "bold"), ("font-size", "14px"),
-                ("text-align", "left"), ("padding", "10px")
-            ]},
-            {"selector": "td", "props": [
-                ("padding", "8px 10px"),
-                ("border-bottom", "1px solid #dcb685")
-            ]},
-        ])
-```
-
-:::
-::: {.card}
-<h3>Resultado</h3>
-
-Con aproximadamente 89,000 registros tras la limpieza, el dataset conserva una muestra ampliamente suficiente para sostener cualquier análisis estadístico con alta confiabilidad. Los duplicados semánticos eliminados representan menos del 2% del total, un porcentaje que estadísticamente se considera despreciable en datasets de esta escala.
+Número de registros duplicados: **`{python} duplicados_totales`**
+Número de registros finales: **`{python} registros_finales`**
+Porcentaje de registros eliminados **`{python} porcentaje`%**
 
 ::: {.callout-warning}
 En este dataset cada fila representa a una persona. Eliminar un registro sin certeza de que sea un duplicado equivale a borrar del análisis a una persona real. Por esta razón, solo se eliminan aquellos casos donde la evidencia de duplicidad es inequívoca, es decir, cuando coinciden nombre, fecha de desaparición y folio único de búsqueda simultáneamente.
@@ -727,7 +704,7 @@ En este dataset cada fila representa a una persona. Eliminar un registro sin cer
 
 ::: {.layout-nrow=4}
 ::: {.card}
-En esta sección se busca validar los datos contenidos mediante la revisión y búsqueda de datos anómalos. Se analizan principalmente las fechas y los rangos establecidos y los nombres para identificar falta de datos en esta variable.
+En esta sección se busca validar los datos contenidos mediante la revisión y búsqueda de datos anómalos. Se analizan principalmente las fechas y los rangos establecidos para no realizar análisis con valores atípicos erróneos.
 :::
 
 ::: {.card}
@@ -881,7 +858,7 @@ plt.rcParams.update({
     "ytick.labelsize":  9,
 })
 
-def cargar_dataset_limpio(ruta="data/tot_reg_desap.csv"):
+def cargar_dataset_limpio(ruta="data/dataset_limpio.csv"):
     df = pd.read_csv(ruta)
     df["entidad_desap"]    = df["entidad_desap"].astype("category")
     df["estatus_busqueda"] = df["estatus_busqueda"].astype("category")
@@ -1389,6 +1366,19 @@ Finalmente, las **correlaciones más débiles** corresponden a: **`{python} debi
 
 :::
 
+# Conclusiones
+
+La descripción de la aplicación del framework CRISP-DM ofrece un panorama de análisis que ayuda a establecer objetivos y avanzar de manera efectiva en el procesamiento de los datos. Aplicado a un conjunto de datos que contiene información de los registros de personas desaparecidas en México junto con datos de su presencia en los registros RNPED o RNPDNO permitió tener un flujo de trabajo organizado con metas claras.
+
+Respecto a las etapas de esta metodología, la comprensión del negocio consistió en abarcar todo el contexto de esta crisis en México, no sólo se trata de mirar cifras, sino de reconocer que cada registro representa una vida y una familia. En las etapas de comprensión y preparación de Datos fue fundamental la observación de las variables con las que se contaban y cómo funcionaban para representar los registros, es una de las partes más delicadas porque se buscó evitar introducir sesgos en el manejo de datos faltantes. No se llevaron a cabo modelos de Minería de Datos, sin embargo, se sugirieron algunas aplicaciones que podrían realizarse en este trabajo. Por último, en la parte de evaluación y despliegue es donde vemos como queda plasmado todos los procedimientos anteriores y donde podemos finalmente responder a nuestras preguntas y objetivos planteados.
+
+A partir de la exploración de los registros oficiales de personas desaparecidas en México, se extraen las siguientes conclusiones fundamentales que dimensionan la crisis tanto a nivel operativo como estructural:
+
+1. La transición del registro histórico (RNPED) al sistema actual (RNPDNO) no fue un proceso de continuidad, sino de fractura. Las altas correlaciones entre las fases de "Búsqueda Generalizada" y la base de datos reciente, en contraste con su correlación negativa frente al padrón antiguo, demuestran matemáticamente que el Estado priorizó expedientes recientes. Esto derivó en una desaparición administrativa donde miles de casos históricos quedaron marginados de las estrategias oficiales de localización.
+2. El crecimiento acelerado de registros a partir de 2018 no refleja necesariamente un incremento súbito en la tasa de desapariciones, sino la entrada en vigor de normativas que obligaron a visibilizar casos históricamente omitidos. Sin embargo, debido a la "cifra negra" y a los vacíos en los identificadores clave (FUB), los datos actuales siguen siendo una representación parcial que subestima la magnitud real de la crisis.
+3. Aunque la desaparición es un fenómeno de alcance nacional, su comportamiento territorial es altamente desigual (índice de Gini > 0.40). Entidades como el Estado de México y Tamaulipas no solo concentran el mayor volumen, sino que presentan una dispersión crónica que abarca décadas. Esto concluye que las estrategias federales homogéneas son ineficientes; se requieren intervenciones priorizadas, focalizadas y con un entendimiento del contexto de violencia local.
+
+En definitiva, este ejercicio demuestra que detrás de un archivo tabular aparentemente estático, existe una representación empírica y justificable de una crisis humanitaria. Bajo la lente de la minería de datos, logramos visibilizar el impacto directo que tienen las decisiones institucionales del Estado sobre el registro del fenómeno, alterando su progresión y atención a lo largo del tiempo. Más allá de los números, estas observaciones proporcionan la base técnica necesaria para exigir rendición de cuentas, optimizar los recursos de búsqueda y tomar decisiones basadas en evidencia que busquen mitigar la incertidumbre y la impunidad que crecen día con día en la sociedad mexicana.
 
 
 # Fuentes
