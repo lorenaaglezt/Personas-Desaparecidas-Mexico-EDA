@@ -1371,21 +1371,21 @@ Finalmente, las **correlaciones más débiles** corresponden a: **`{python} debi
 
 ::: {.card}
 
-### Hallazgo 1 — Concentración geográfica en pocas entidades
+### Hallazgo 1 - Concentración geográfica en pocas entidades
 
-### Hallazgo 2 — Crecimiento sostenido de registros a partir del 2007
+### Hallazgo 2 - Crecimiento sostenido de registros a partir del 2007
 
-### Hallazgo 3 — Estatus de búsqueda: "Se busca reportante"
+### Hallazgo 3 - Estatus de búsqueda: "Se busca reportante"
 
-### Hallazgo 4 — Variabilidad heterogénea entre las entidades
+### Hallazgo 4 - Variabilidad heterogénea entre las entidades
 
-### Hallazgo 5 — Búsqueda Generalizada relacionada con RNPED y RNPDNO
+### Hallazgo 5 - Búsqueda Generalizada relacionada con RNPED y RNPDNO
 
-### Hallazgo 6 — Registros históricos que desaparecieron del sistema oficial
+### Hallazgo 6 - Registros históricos que desaparecieron del sistema oficial
 
-### Hallazgo 7 — La desaparición es un fenómeno nacional, pero con epicentros muy marcados
+### Hallazgo 7 - La desaparición es un fenómeno nacional, pero con epicentros muy marcados
 
-### Hallazgo 8 — La mayoría de los casos con progreso real son una minoría dentro del sistema
+### Hallazgo 8 - La mayoría de los casos con progreso real son una minoría dentro del sistema
 
 :::
 
