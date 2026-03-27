@@ -112,6 +112,9 @@ quarto preview tarea02.qmd
 ```
 Abre automáticamente el dashboard en el navegador.
 
+O visualizarlo en el siguiente enlace creado con Netlify
+
+[**Dashboard Personas Desaparecidas en México**](https://bejewelled-speculoos-5d7245.netlify.app)
 ---
 
 ## Notas
